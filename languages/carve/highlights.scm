@@ -129,12 +129,16 @@
 (strong) @emphasis.strong
 (bold_italic) @emphasis.strong
 (bold_italic) @emphasis
+(underline) @emphasis
+(strikethrough) @emphasis
 (symbol) @string.special.symbol
 (extension_inline) @keyword
 (mention) @link_text
 (tag) @tag
 (insert) @emphasis
 (delete) @emphasis
+(substitution) @emphasis
+(editorial_comment) @comment
 
 [
   (highlighted)
@@ -149,6 +153,10 @@
   (bold_italic_end)
   (strong_begin)
   (strong_end)
+  (underline_begin)
+  (underline_end)
+  (strikethrough_begin)
+  (strikethrough_end)
   (superscript_begin)
   (superscript_end)
   (subscript_begin)

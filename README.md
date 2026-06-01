@@ -38,8 +38,33 @@ The extension is not yet in Zed's official registry. Install it locally:
 Zed fetches the configured Tree-sitter grammar on first install. Subsequent
 installs use Zed's cached grammar.
 
-To verify the install, open any `.crv` file and check that headings, emphasis,
-code blocks, and links are highlighted.
+If you update the pinned grammar revision in `extension.toml`, reinstall the dev
+extension so Zed rebuilds the grammar.
+
+## Testing
+
+There is no standalone Zed extension test runner in the Zed CLI. Use these local
+checks before changing the manifest or queries:
+
+```bash
+python3 - <<'PY'
+import tomllib
+for path in ['extension.toml', 'languages/carve/config.toml']:
+    with open(path, 'rb') as f:
+        tomllib.load(f)
+    print(f'{path}: ok')
+PY
+
+git diff --check
+
+tree-sitter query \
+  languages/carve/highlights.scm \
+  ../tree-sitter-carve/test/corpus/carve.txt
+```
+
+For manual validation, install the extension as a dev extension, open
+`tests/fixtures/99-kitchen-sink.crv`, and check that headings, Carve emphasis,
+extensions, comments, math, code blocks, and links are highlighted.
 
 ## Fixtures
 
@@ -49,8 +74,6 @@ documents.
 
 ## Roadmap
 
-- Replace the compatibility grammar with a native `tree-sitter-carve` grammar.
-- Add query coverage for syntax that differs from Djot.
 - Expand native grammar coverage alongside the Carve conformance corpus.
 - Submit to the Zed extension registry after enough compatibility testing.
 
