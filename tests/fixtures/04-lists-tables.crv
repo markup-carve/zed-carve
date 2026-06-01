@@ -1,0 +1,40 @@
+# Lists
+
+Unordered list:
+
+- Apples
+- Oranges
+  - Mandarin
+  - Blood orange
+- Bananas
+
+Ordered list:
+
+1. First
+2. Second
+3. Third
+
+Task list:
+
+- [ ] Open
+- [x] Done
+- [ ] Pending
+
+Definition list:
+
+: Apple
+
+  A red fruit, sometimes green.
+
+: Banana
+
+  A yellow fruit, often curved.
+
+# Tables
+
+| Name    | Role       | Active |
+|---------|------------|:------:|
+| Alice   | Developer  | yes    |
+| Bob     | Designer   | no     |
+| Charlie | PM         | yes    |
+^ Team members as of Q1.

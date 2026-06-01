@@ -1,0 +1,50 @@
+# Divs and admonitions
+
+A plain div:
+
+::: note
+This is a generic note block. It can contain *any* Carve.
+
+Including multiple paragraphs.
+:::
+
+A warning:
+
+::: warning
+Watch out for null pointers.
+:::
+
+A tip:
+
+::: tip
+Use `array_map` for transformations.
+:::
+
+A danger callout:
+
+::: danger
+Destructive: cannot be undone.
+:::
+
+Nested div with class:
+
+{.aside .small}
+:::
+A side note styled as small text.
+:::
+
+Block quote:
+
+> "Premature optimization is the root of all evil."
+>
+> --- Donald Knuth
+
+Block quote with caption:
+
+> The only way to do great work is to love what you do.
+^ Steve Jobs, Stanford 2005
+
+Footnote reference[^note] in a sentence.
+
+[^note]: Footnote definition body. Can wrap across lines
+  with continuation indentation.

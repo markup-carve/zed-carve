@@ -1,0 +1,13 @@
+.DS_Store
+*.swp
+*.swo
+tmp/
+node_modules/
+.idea/
+.vscode/
+
+# Build artifacts created by Zed when installing the dev extension.
+/grammars/
+
+# Optional per-user editor task setup (paths are absolute to my dev worktree).
+.zed/

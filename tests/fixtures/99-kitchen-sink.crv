@@ -1,0 +1,100 @@
+---
+title: Kitchen sink
+---
+
+# Kitchen sink {#kitchen-sink .demo}
+
+A paragraph with /italic/, *bold*, `code`, and a [link](https://example.com).
+
+Reference-style: [the example][ex] elsewhere.
+
+[ex]: https://example.com
+
+Autolink: <https://markup-carve.github.io/carve/>.
+
+## Lists
+
+- Item with `inline code`
+- Item with [a link](#kitchen-sink)
+
+  - Nested
+
+    - Deeper
+
+1. First {.first}
+2. Second
+3. Third
+
+## Tables
+
+| Col 1 | Col 2 |
+|-------|-------|
+| a     | b     |
+| c     | d     |
+
+## Carve extras
+
+*[HTML]: HyperText Markup Language
+*[CSS]: Cascading Style Sheets
+
+Inline extensions: :kbd[Ctrl] and :mark[important].
+
+Thanks to @alice and #release-1.0 for the review.
+
+![Example](https://raw.githubusercontent.com/markup-carve/zed-carve/main/icons/carve.svg)
+^ Figure 1: the canonical example (no blank line above caption).
+
+> A blockquote with a caption attached directly.
+^ Quote attribution.
+
+%%%
+A multi-line draft comment that won't render
+in the HTML output. Useful for inline TODOs.
+%%%
+
+## Code injection
+
+``` rust
+let html = carve::to_html("# Hi");
+println!("{html}");
+```
+
+``` bash
+cargo run -- examples/basic.crv
+```
+
+## Math
+
+Inline $a^2 + b^2 = c^2$ and display:
+
+$$
+\int_0^\infty e^{-x^2} \, dx = \frac{\sqrt{\pi}}{2}
+$$
+
+## Divs
+
+{.warning}
+:::
+Be careful with `unsafe` blocks.
+:::
+
+::: tip
+Run `tree-sitter test` before opening a PR.
+:::
+
+## Footnotes
+
+A sentence with a footnote.[^one]
+
+[^one]: The footnote content.
+
+## Comments
+
+%%%%
+%%%
+Block-level fenced comment.
+Can span multiple paragraphs.
+%%%
+%%%%
+
+%% Inline short comment.

@@ -1,0 +1,20 @@
+---
+title: Blog post title
+date: 2026-05-13
+author: Mark Scherer
+tags:
+  - php
+  - carve
+  - zed
+draft: false
+---
+
+# Blog post title
+
+Body content follows the frontmatter block.
+
+Frontmatter can also be explicit:
+
+```
+Switch the file extension to see other frontmatter modes.
+```

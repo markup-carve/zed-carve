@@ -1,0 +1,46 @@
+# Code blocks
+
+A PHP example:
+
+``` php
+<?php
+declare(strict_types=1);
+
+function greet(string $name): string {
+    return "Hello, {$name}!";
+}
+```
+
+A JavaScript example:
+
+``` javascript
+function greet(name) {
+    return `Hello, ${name}!`;
+}
+```
+
+A bash example:
+
+``` bash
+#!/usr/bin/env bash
+set -euo pipefail
+echo "hello"
+```
+
+A YAML example:
+
+``` yaml
+name: example
+version: 1.0
+dependencies:
+  - foo
+  - bar
+```
+
+A raw HTML block:
+
+``` =html
+<details><summary>Click</summary>Hidden content</details>
+```
+
+Verbatim inline: `printf("%s\n", x);` in the middle of text.

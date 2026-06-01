@@ -1,0 +1,19 @@
+# Inline emphasis
+
+A paragraph with /italic/ and *bold* and /*bold italic*/ words.
+
+Inline `code spans` get monospaced.
+
+Smart quotes: "double" and 'single'. Em-dash --- and en-dash --.
+
+Math: $\pi r^2$ inline; display below.
+
+$$E = mc^2$$
+
+Insert {+new text+}, delete {-old text-}, highlight ==emphasized==.
+
+Subscript H,,2,,O and superscript E=mc^2^.
+
+A symbol :rocket: and an inline extension :kbd[Ctrl].
+
+Backslash escape \*literal asterisks\* and \/literal slashes\/ in prose.
