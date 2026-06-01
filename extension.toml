@@ -10,11 +10,6 @@ icon_themes = []
 languages = ["languages/carve"]
 capabilities = []
 
-[grammars.djot]
-# php-collective fork of treeman/tree-sitter-djot. Carries a WASM-host
-# compat fix (isalnum -> inline ASCII helper) so Zed loads the grammar
-# cleanly. Carve does not yet have a native tree-sitter grammar, so this
-# extension uses the closest available post-Djot parser as a compatibility
-# layer and layers Carve-oriented queries/config on top.
-repository = "https://github.com/php-collective/tree-sitter-djot"
-rev = "50dc1725f5812dfc5ca465aa80f18770e2e6776b"
+[grammars.carve]
+repository = "https://github.com/markup-carve/tree-sitter-carve"
+rev = "0636757b3507599abd626a3f0dc4f2b19f77884b"

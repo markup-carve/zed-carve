@@ -127,7 +127,12 @@
 ; Inline emphasis family.
 (emphasis) @emphasis
 (strong) @emphasis.strong
+(bold_italic) @emphasis.strong
+(bold_italic) @emphasis
 (symbol) @string.special.symbol
+(extension_inline) @keyword
+(mention) @link_text
+(tag) @tag
 (insert) @emphasis
 (delete) @emphasis
 
@@ -140,6 +145,8 @@
 [
   (emphasis_begin)
   (emphasis_end)
+  (bold_italic_begin)
+  (bold_italic_end)
   (strong_begin)
   (strong_end)
   (superscript_begin)
@@ -169,6 +176,7 @@
 
 ; Comments.
 [
+  (comment_line)
   (comment)
   (inline_comment)
 ] @comment
@@ -233,10 +241,6 @@
 (todo) @keyword
 (note) @comment
 (fixme) @keyword
-
-; Compatibility grammar extras.
-(wikilink) @link_text
-(mention) @link_text
 
 ; Fenced multi-line comment %%%...%%%.
 (fenced_comment_block) @comment

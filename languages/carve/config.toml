@@ -1,5 +1,5 @@
 name = "Carve"
-grammar = "djot"
+grammar = "carve"
 path_suffixes = ["crv", "carve"]
 block_comment = ["%% ", ""]
 autoclose_before = ";:.,=}])>"

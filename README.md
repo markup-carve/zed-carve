@@ -8,16 +8,9 @@ outline support for `.crv` / `.carve` files.
 
 ## Status
 
-Carve does not yet have a dedicated Tree-sitter grammar. Until
-`tree-sitter-carve` exists, this extension uses the
-[`php-collective/tree-sitter-djot`](https://github.com/php-collective/tree-sitter-djot)
-grammar as the closest compatible base and layers Carve-oriented Zed config and
-queries on top.
-
-That means core document structure, headings, lists, tables, code blocks,
-frontmatter, attributes, links, footnotes, comments, and many Djot-adjacent
-constructs highlight well. Carve-specific delimiter choices and newer syntax may
-not parse perfectly until the native grammar lands.
+This extension uses the native
+[`markup-carve/tree-sitter-carve`](https://github.com/markup-carve/tree-sitter-carve)
+grammar.
 
 ## Features
 
@@ -58,14 +51,15 @@ documents.
 
 - Replace the compatibility grammar with a native `tree-sitter-carve` grammar.
 - Add query coverage for syntax that differs from Djot.
-- Submit to the Zed extension registry after native grammar support or enough
-  compatibility testing.
+- Expand native grammar coverage alongside the Carve conformance corpus.
+- Submit to the Zed extension registry after enough compatibility testing.
 
 ## Credits
 
-- [Jonas Hietala](https://www.jonashietala.se/) for the upstream Djot grammar.
+- [Jonas Hietala](https://www.jonashietala.se/) for the upstream Djot grammar
+  architecture that informed the first native Carve grammar.
 - [PHP Collective](https://github.com/php-collective) for the Zed Djot extension
-  and WASM-compatible Djot grammar fork this extension currently builds on.
+  this extension was initially scaffolded from.
 - [markup-carve](https://github.com/markup-carve) for the Carve specification
   and conformance corpus.
 
