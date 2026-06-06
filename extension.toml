@@ -12,4 +12,4 @@ capabilities = []
 
 [grammars.carve]
 repository = "https://github.com/markup-carve/tree-sitter-carve"
-rev = "407e9f52a75ad7c363f3f7feabcfe015a9a696c8"
+rev = "edb1aeeebdb42cf194eab98df8bef08ed192c242"
