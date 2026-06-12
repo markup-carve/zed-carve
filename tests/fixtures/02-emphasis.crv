@@ -10,9 +10,9 @@ Math: $\pi r^2$ inline; display below.
 
 $$E = mc^2$$
 
-Insert {+new text+}, delete {-old text-}, highlight ==emphasized==.
+Insert {+new text+}, delete {-old text-}, highlight =emphasized=.
 
-Subscript H,,2,,O and superscript E=mc^2^.
+Subscript H{,2,}O and superscript E=mc{^2^}.
 
 A symbol :rocket: and an inline extension :kbd[Ctrl].
 
