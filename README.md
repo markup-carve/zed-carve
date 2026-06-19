@@ -43,23 +43,29 @@ extension so Zed rebuilds the grammar.
 
 ## Testing
 
-There is no standalone Zed extension test runner in the Zed CLI. Use these local
-checks before changing the manifest or queries:
+There is no standalone Zed extension test runner in the Zed CLI. The
+[`CI workflow`](.github/workflows/ci.yml) validates the extension on every push
+and pull request:
+
+- `extension.toml` is well-formed TOML and the `[grammars.carve]` rev is a full
+  40-character commit hash.
+- The pinned `tree-sitter-carve` grammar is fetched at that exact rev, then
+  `tree-sitter generate` plus `tree-sitter test` confirm it is buildable and
+  its own corpus passes.
+- Every `languages/carve/*.scm` query compiles against that grammar, so a query
+  that references a node the grammar removed fails CI.
+- Every fixture under `tests/fixtures/` parses without `ERROR`/`MISSING` nodes.
+
+To reproduce the query and fixture checks locally, build the grammar from a
+sibling checkout and point Tree-sitter at it:
 
 ```bash
-python3 - <<'PY'
-import tomllib
-for path in ['extension.toml', 'languages/carve/config.toml']:
-    with open(path, 'rb') as f:
-        tomllib.load(f)
-    print(f'{path}: ok')
-PY
+# from the zed-carve checkout, with ../tree-sitter-carve checked out at the
+# pinned rev and `tree-sitter generate` run there.
+tree-sitter query --scope text.carve languages/carve/highlights.scm tests/fixtures/99-kitchen-sink.crv
+tree-sitter parse --scope text.carve tests/fixtures/99-kitchen-sink.crv
 
 git diff --check
-
-tree-sitter query \
-  languages/carve/highlights.scm \
-  ../tree-sitter-carve/test/corpus/carve.txt
 ```
 
 For manual validation, install the extension as a dev extension, open

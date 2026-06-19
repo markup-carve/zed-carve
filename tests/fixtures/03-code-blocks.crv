@@ -39,7 +39,7 @@ dependencies:
 
 A raw HTML block:
 
-``` =html
+```raw html
 <details><summary>Click</summary>Hidden content</details>
 ```
 
