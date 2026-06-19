@@ -1,0 +1,20 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["before 6am on monday"],
+  "labels": ["dependencies"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Bump the pinned tree-sitter-carve grammar rev in extension.toml",
+      "managerFilePatterns": ["/^extension\\.toml$/"],
+      "matchStrings": [
+        "repository = \"https://github\\.com/markup-carve/tree-sitter-carve\"\\s+rev = \"(?<currentDigest>[a-f0-9]{7,40})\""
+      ],
+      "currentValueTemplate": "main",
+      "depNameTemplate": "markup-carve/tree-sitter-carve",
+      "packageNameTemplate": "https://github.com/markup-carve/tree-sitter-carve",
+      "datasourceTemplate": "git-refs"
+    }
+  ]
+}
