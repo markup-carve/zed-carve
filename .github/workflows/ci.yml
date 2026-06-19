@@ -22,7 +22,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       # Parse extension.toml once, fail fast if it is malformed, and export the
       # pinned grammar coordinates for the later steps. The rev must be a full
