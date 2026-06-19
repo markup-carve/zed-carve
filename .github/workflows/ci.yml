@@ -1,0 +1,145 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate manifest, grammar, and queries
+    runs-on: ubuntu-latest
+    env:
+      # tree-sitter-cli version. Matches the grammar's devDependency.
+      TS_CLI: tree-sitter-cli@0.22.1
+    steps:
+      - name: Check out extension
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Parse extension.toml once, fail fast if it is malformed, and export the
+      # pinned grammar coordinates for the later steps. The rev must be a full
+      # 40-character commit hash so installs are reproducible; a branch name or
+      # short hash is rejected here.
+      - name: Validate extension.toml and grammar pin
+        id: manifest
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import os, re, sys, tomllib
+
+          with open("extension.toml", "rb") as f:
+              data = tomllib.load(f)
+
+          grammar = data.get("grammars", {}).get("carve")
+          if grammar is None:
+              sys.exit("extension.toml: missing [grammars.carve] section")
+
+          repo = grammar.get("repository")
+          rev = grammar.get("rev")
+          if not repo:
+              sys.exit("extension.toml: [grammars.carve] is missing 'repository'")
+          if not isinstance(rev, str) or not re.fullmatch(r"[0-9a-f]{40}", rev):
+              sys.exit(f"extension.toml: [grammars.carve] rev must be a 40-hex commit, got: {rev!r}")
+
+          # The language config must also be valid TOML.
+          with open("languages/carve/config.toml", "rb") as f:
+              tomllib.load(f)
+
+          print(f"repo={repo}")
+          print(f"rev={rev}")
+          print(f"extension.toml ok; grammar {repo}@{rev}", file=sys.stderr)
+          PY
+
+      # Fetch the grammar at exactly the pinned rev. A shallow fetch of the
+      # single commit keeps this cheap and proves the rev still exists upstream.
+      - name: Fetch pinned tree-sitter-carve grammar
+        run: |
+          set -euo pipefail
+          repo='${{ steps.manifest.outputs.repo }}'
+          rev='${{ steps.manifest.outputs.rev }}'
+          git init grammar
+          cd grammar
+          git remote add origin "$repo"
+          git fetch --depth 1 origin "$rev"
+          git checkout FETCH_HEAD
+
+      # Generate, build, and run the grammar's own corpus tests. This is the
+      # cheapest real correctness signal that the pinned rev is buildable and
+      # internally consistent for a grammar-consuming extension.
+      - name: Generate, build, and test grammar
+        working-directory: grammar
+        run: |
+          set -euo pipefail
+          npx --yes "$TS_CLI" generate
+          npx --yes "$TS_CLI" test
+
+      # Register the freshly built grammar so `tree-sitter query`/`parse` can
+      # resolve `--scope text.carve` by node names from this exact rev.
+      # tree-sitter discovers grammars by scanning each parser-directory for a
+      # child named tree-sitter-<lang>, so the directory is the workspace root
+      # and the child is a symlink to the built grammar.
+      - name: Register grammar for query and parse resolution
+        run: |
+          set -euo pipefail
+          npx --yes "$TS_CLI" init-config
+          ln -s "$PWD/grammar" "$PWD/tree-sitter-carve"
+          config="$HOME/.config/tree-sitter/config.json"
+          python3 - "$config" "$PWD" <<'PY'
+          import json, sys
+          config_path, parser_dir = sys.argv[1], sys.argv[2]
+          with open(config_path) as f:
+              config = json.load(f)
+          config["parser-directories"] = [parser_dir]
+          with open(config_path, "w") as f:
+              json.dump(config, f, indent=2)
+          PY
+
+      # Compile every query against the pinned grammar. A query that references
+      # a node the grammar removed or renamed fails compilation, so this guards
+      # the extension against silent breakage on a grammar bump.
+      - name: Validate queries against grammar
+        run: |
+          set -euo pipefail
+          printf 'carve\n' > sample.crv
+          status=0
+          for scm in languages/carve/*.scm; do
+            if npx --yes "$TS_CLI" query --scope text.carve "$scm" sample.crv > /dev/null; then
+              echo "ok   $scm"
+            else
+              echo "FAIL $scm"
+              status=1
+            fi
+          done
+          exit "$status"
+
+      # Parse every fixture under tests/ with the pinned grammar. A grammar
+      # change that introduces a parse error on real Carve syntax is caught
+      # here. This is the test runner for tests/ (the fixtures are the corpus).
+      - name: Parse fixtures under tests/
+        run: |
+          set -euo pipefail
+          status=0
+          for crv in tests/fixtures/*.crv; do
+            out="$(npx --yes "$TS_CLI" parse --scope text.carve "$crv" 2>&1)"
+            if printf '%s' "$out" | grep -qE 'ERROR|MISSING'; then
+              echo "FAIL $crv"
+              printf '%s\n' "$out" | grep -E 'ERROR|MISSING' | head -n 5
+              status=1
+            else
+              echo "ok   $crv"
+            fi
+          done
+          exit "$status"
+
+      # Catch whitespace errors / conflict markers across all committed content.
+      # Diffing against the empty tree makes `--check` inspect every tracked
+      # line, not just an (empty) worktree delta on a clean checkout.
+      - name: git diff --check
+        run: git diff --check "$(git hash-object -t tree /dev/null)" HEAD
