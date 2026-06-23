@@ -58,6 +58,11 @@
 
 (language) @attribute
 
+; Opener metadata (carve#201): a quoted "header" and a bracketed [label] on
+; code fences and divs.
+(code_block_header) @string
+(code_block_label) @label
+
 (language_marker) @punctuation.delimiter
 
 ; Block quote — color the `>` marker only; leave the inner content
