@@ -1,10 +1,10 @@
 # zed-carve
 
 Zed editor support for [Carve](https://markup-carve.github.io/carve/), a
-post-Djot lightweight markup language with visual mnemonics.
+post-Markdown lightweight markup language with visual mnemonics.
 
 This extension provides syntax highlighting, bracket behavior, injections, and
-outline support for `.crv` / `.carve` files.
+outline support for `.crv` files.
 
 ## Status
 
@@ -21,7 +21,7 @@ grammar.
 - Bracket matching and autoclose pairs for `[]`, `()`, `{}`, `/`, `_`, `*`, and
   backticks.
 - Outline view based on document headings.
-- Carve file association for `.crv` and `.carve`.
+- Carve file association for `.crv`.
 
 ## Install As A Dev Extension
 
