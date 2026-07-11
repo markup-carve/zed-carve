@@ -1,7 +1,7 @@
 id = "carve"
 name = "Carve"
 description = "Syntax highlighting for Carve, a post-Markdown lightweight markup language"
-version = "0.1.0"
+version = "0.1.1"
 schema_version = 1
 authors = ["Mark Scherer <dereuromark@gmail.com>"]
 repository = "https://github.com/markup-carve/zed-carve"
@@ -12,4 +12,4 @@ capabilities = []
 
 [grammars.carve]
 repository = "https://github.com/markup-carve/tree-sitter-carve"
-rev = "4979348cf8cbc5028ba8157ceb8306ddb02b973b"
+rev = "1eb2dc1c1c4e8be1e588d1f7110897a1377988a4"

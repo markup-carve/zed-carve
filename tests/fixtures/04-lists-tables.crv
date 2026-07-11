@@ -18,7 +18,11 @@ Task list:
 
 - [ ] Open
 - [x] Done
-- [ ] Pending
+- [X] Done uppercase
+- [_] Open underscore
+- [-] Dropped
+- [>] Deferred
+- [?] Maybe
 
 Definition list:
 
