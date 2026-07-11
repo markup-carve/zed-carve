@@ -24,7 +24,12 @@ grammar.
 - LaTeX highlighting inside math spans/blocks.
 - Bracket matching and autoclose pairs for `[]`, `()`, `{}`, `/`, `_`, `*`, and
   backticks.
-- Outline view based on document headings.
+- Outline view based on document headings and div/admonition blocks.
+- Snippets for common constructs: `adm` (admonition), `div`, `code` (fenced
+  block), `table`, `fm` (frontmatter), `fn` (footnote), `task` (task item,
+  any spec state).
+- Editor scopes that keep emphasis/verbatim autoclose out of code spans and
+  comments.
 - Carve file association for `.crv`.
 
 ## Install As A Dev Extension
