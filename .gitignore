@@ -11,3 +11,4 @@ node_modules/
 
 # Optional per-user editor task setup (paths are absolute to my dev worktree).
 .zed/
+target/
