@@ -8,6 +8,7 @@ repository = "https://github.com/markup-carve/zed-carve"
 themes = []
 icon_themes = []
 languages = ["languages/carve"]
+snippets = ["./snippets/carve.json"]
 capabilities = []
 
 [grammars.carve]

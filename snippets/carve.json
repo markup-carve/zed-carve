@@ -1,0 +1,41 @@
+{
+  "Admonition": {
+    "prefix": "adm",
+    "body": ["::: ${1|note,tip,warning,danger|}", "$0", ":::"],
+    "description": "Admonition block (note/tip/warning/danger)"
+  },
+  "Div with class": {
+    "prefix": "div",
+    "body": ["{.$1}", ":::", "$0", ":::"],
+    "description": "Generic div block with class attribute"
+  },
+  "Code block": {
+    "prefix": "code",
+    "body": ["``` $1", "$0", "```"],
+    "description": "Fenced code block with language"
+  },
+  "Table": {
+    "prefix": "table",
+    "body": [
+      "| ${1:Header} | ${2:Header} |",
+      "|---|---|",
+      "| $0 |  |"
+    ],
+    "description": "Two-column table skeleton"
+  },
+  "Frontmatter": {
+    "prefix": "fm",
+    "body": ["---", "title: $1", "---", "", "$0"],
+    "description": "YAML frontmatter block"
+  },
+  "Footnote": {
+    "prefix": "fn",
+    "body": ["[^$1]", "", "[^$1]: $0"],
+    "description": "Footnote reference plus definition"
+  },
+  "Task item": {
+    "prefix": "task",
+    "body": ["- [${1| ,x,-,>,?,_|}] $0"],
+    "description": "Task list item (any spec state)"
+  }
+}
