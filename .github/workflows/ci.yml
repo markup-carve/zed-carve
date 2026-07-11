@@ -143,3 +143,18 @@ jobs:
       # line, not just an (empty) worktree delta on a clean checkout.
       - name: git diff --check
         run: git diff --check "$(git hash-object -t tree /dev/null)" HEAD
+
+  build-wasm:
+    name: Build extension WASM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out extension
+        uses: actions/checkout@v4
+
+      # Zed compiles extensions with the wasm32-wasip2 target (see
+      # crates/extension/src/extension_builder.rs in zed-industries/zed).
+      - name: Install wasm32-wasip2 target
+        run: rustup target add wasm32-wasip2
+
+      - name: Build
+        run: cargo build --release --target wasm32-wasip2
