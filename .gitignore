@@ -8,6 +8,7 @@ node_modules/
 
 # Build artifacts created by Zed when installing the dev extension.
 /grammars/
+/extension.wasm
 
 # Optional per-user editor task setup (paths are absolute to my dev worktree).
 .zed/
