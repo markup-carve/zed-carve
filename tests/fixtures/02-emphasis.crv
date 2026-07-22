@@ -4,6 +4,8 @@ A paragraph with /italic/ and *bold* and /*bold italic*/ words.
 
 Inline `code spans` get monospaced.
 
+Inline literal !`/kaet/` stays verbatim but renders as prose, and !`a<b>`{.ipa} takes attributes.
+
 Smart quotes: "double" and 'single'. Em-dash --- and en-dash --.
 
 Math: $\pi r^2$ inline; display below.

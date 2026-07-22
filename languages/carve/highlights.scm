@@ -176,6 +176,9 @@
   (math_marker)
   (math_marker_begin)
   (math_marker_end)
+  (literal_marker)
+  (literal_marker_begin)
+  (literal_marker_end)
   (raw_inline_attribute)
   (raw_inline_marker_begin)
   (raw_inline_marker_end)
@@ -185,6 +188,10 @@
 (math) @string.special
 (verbatim) @text.literal
 (raw_inline) @text.literal
+
+; Inline literal (!`…`): verbatim capture, but it renders as ordinary prose
+; rather than code, so it deliberately gets no code face.
+(inline_literal) @none
 
 ; Comments.
 [
