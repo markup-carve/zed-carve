@@ -11,3 +11,9 @@
 ###### Heading level 6
 
 Body text after a heading.
+
+# A heading ends at the newline
+Prose written directly beneath it is a paragraph, not part of the title.
+
+## Same level, twice
+## The second is its own heading, not a continuation
