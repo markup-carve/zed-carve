@@ -17,10 +17,10 @@ jobs:
       TS_CLI: tree-sitter-cli@0.22.1
     steps:
       - name: Check out extension
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
 
@@ -149,7 +149,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out extension
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Zed compiles extensions with the wasm32-wasip2 target (see
       # crates/extension/src/extension_builder.rs in zed-industries/zed).
