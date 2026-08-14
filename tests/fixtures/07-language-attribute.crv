@@ -1,0 +1,12 @@
+A span carrying a language: [x]{:fr} and one with subtags [y]{:zh-Hant}.
+
+{:de}
+A block-attribute line carrying a language.
+
+-{:fr} a bullet glued to a language attribute
+
+1.{:fr} an ordered marker glued to a language attribute
+
+A language beside other items: [z]{#i :fr .c}.
+
+The empty form: [w]{:}.
