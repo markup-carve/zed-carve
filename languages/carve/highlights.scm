@@ -216,6 +216,9 @@
 ; Boolean attribute shorthand: `{reversed}`, `{flag}`.
 (boolean_attribute (key) @property)
 
+; The language attribute: `{:fr}`, `{:zh-Hant}` (markup-carve/carve#1114).
+(language_attribute) @attribute
+
 ; Links.
 (link_text ["[" "]"] @punctuation.bracket)
 (autolink ["<" ">"] @punctuation.bracket)
