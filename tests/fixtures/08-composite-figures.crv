@@ -1,0 +1,75 @@
+# Composite figures
+
+A bare `::: figure` opener is one figure of ordered panels (PART 9 4c).
+
+::: figure
+![Left panel](left.png)
+^ (a) The left panel
+
+![Right panel](right.png)
+^ (b) The right panel
+:::
+^ Figure #: The two panels, side by side.
+
+An opener carrying a quoted title is a generic container, not a group.
+
+::: figure "A titled figure div"
+Ordinary container content.
+:::
+
+So is one carrying a label.
+
+::: figure [gallery]
+Ordinary container content.
+:::
+
+Groups do not nest, so the inner opener below is a generic container.
+
+::: figure
+:::: figure
+![Inner](inner.png)
+::::
+:::
+^ Figure #: Only the outer opener is the group.
+
+The same holds through one intervening container.
+
+::: figure
+:::: note
+::::: figure
+![Nested through a note](note.png)
+:::::
+::::
+:::
+
+Through a quote.
+
+::: figure
+> Quoted context.
+>
+> :::: figure
+> ![Nested through a quote](quote.png)
+> ::::
+:::
+
+And through a list item.
+
+::: figure
+- A panel with a caption below it.
+
+  :::: figure
+  ![Nested through a list item](item.png)
+  ::::
+:::
+
+A group nested inside a container of another kind is still a group.
+
+::: note
+:::: figure
+![Panel](panel.png)
+::::
+:::
+
+The separator is a space run and never a tab, so the next line is a paragraph:
+
+:::	figure
