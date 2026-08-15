@@ -119,6 +119,14 @@ jobs:
           done
           exit "$status"
 
+      # Compiling a query only proves its node names exist. Several patterns
+      # claim the same node and only one color reaches the screen, so a pattern
+      # that never wins is indistinguishable from a pattern that is absent, and
+      # both stay green above. This resolves what Zed would actually paint at a
+      # position - the last capture emitted there wins - and asserts it.
+      - name: Resolve effective highlight captures
+        run: TS_CLI="npx --yes $TS_CLI" node scripts/highlight-captures.mjs
+
       # Parse every fixture under tests/ with the pinned grammar. A grammar
       # change that introduces a parse error on real Carve syntax is caught
       # here. This is the test runner for tests/ (the fixtures are the corpus).
