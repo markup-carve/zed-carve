@@ -48,7 +48,3 @@ validation of grammar or query changes.
   this extension was initially scaffolded from.
 - [markup-carve](https://github.com/markup-carve) for the Carve specification
   and conformance corpus.
-
-## License
-
-MIT
