@@ -1,0 +1,41 @@
+# The colon fence's sigil family
+
+Three colon fences take a punctuation mark where the others take a word. The
+sigil is the only character on the opener that says which container it is.
+
+The line block keeps its line structure.
+
+::: |
+Roses are red,
+  violets are blue,
+this line keeps its indent too.
+:::
+
+The fenced block quote builds the quote the marker-prefixed form builds,
+without a marker on every line.
+
+::: >
+A quote written as a fence.
+
+It can hold more than one paragraph, and needs no marker on any line.
+:::
+
+The local hard-break block turns every soft break in its direct paragraph
+children into a hard break.
+
+::: \
+Every line here
+ends with a hard break,
+including this one.
+:::
+
+Each nests inside the others, with a longer fence.
+
+:::: >
+A quote holding a line block.
+
+::: |
+one
+two
+:::
+::::

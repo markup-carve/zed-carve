@@ -12,7 +12,7 @@
   (comment)
   (comment_line)
   (trailing_comment)
-  (inline_comment)
+  (braced_comment)
   (editorial_comment)
   (fenced_comment_block)
 ] @comment.inclusive

@@ -5,4 +5,4 @@
 
 (div
   (div_marker_begin) @annotation
-  (class_name) @name) @item
+  (admonition_type) @name) @item
