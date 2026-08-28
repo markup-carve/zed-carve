@@ -72,6 +72,13 @@
 ; gray out the entire quote block (which is misleading).
 (block_quote_marker) @punctuation.special
 
+; The colon fence's sigil family: `::: |`, `::: >` and `::: \`. Each opens a
+; container whose body already carries its own color, so the sigil is the only
+; character saying which one opened.
+(line_block_marker) @punctuation.special
+(block_quote_fence_marker) @punctuation.special
+(local_hard_break_marker) @punctuation.special
+
 ; Tables.
 (table_header) @title
 
@@ -197,7 +204,7 @@
 [
   (comment_line)
   (comment)
-  (inline_comment)
+  (braced_comment)
   (trailing_comment)
 ] @comment
 
@@ -206,92 +213,27 @@
 (inline_attribute ["{" "}"] @punctuation.bracket)
 (block_attribute ["{" "}"] @punctuation.bracket)
 
-; Attribute parts.
-[(class) (class_name)] @type
+; Attribute parts, and the colon fence's TYPE WORD. The second used to be
+; spelled `class_name` too, which is what the attribute rule is called;
+; `admonition_type` is the construct the fence actually opens.
+[(class) (admonition_type)] @type
 
 ; Composite figures (PART 9 4c, markup-carve/carve#1215). The kind word `figure`
 ; is reserved among the `:::` types: a BARE opener - the fence, its separator,
 ; the word, and nothing else - is one figure of ordered panels, not an
-; admonition. `!title !label` is the whole distinction, and it is why this is a
-; query rather than a grammar change: the parse tree already tells the two apart
-; by which fields the opener carries. An opener with a quoted title or a
-; `[label]` matches nothing here and keeps the generic `@type` above.
+; admonition. An opener carrying a quoted title or a `[label]` is not that
+; production and keeps the generic `@type` above.
 ;
-; The group caption needs no rule. It is an ordinary `^ ` line one line below the
-; closing fence, and the grammar places it as a SIBLING of the container rather
-; than inside it, where the `(caption)` patterns further down already claim it.
+; ONE PATTERN OVER ONE NODE. This was four: a pattern over the type word with
+; `!title !label` predicates, plus three wildcard chains restoring `@type` on a
+; bare opener nested inside a group, because a query has no transitive closure
+; and GROUPS DO NOT NEST at any depth. The chains reached three levels, and a
+; bare opener deeper than that kept the group color. The grammar reads its own
+; open-block stack now, so the demotion is in the tree.
 ;
-; PRECEDENCE IS ORDER HERE, not `(#set! priority N)`. Upstream tags these
-; patterns 105 and 110 against a default of 100; this file carries no priority
-; directives at all, because Zed resolves overlapping captures by the order they
-; are emitted and the later one wins - the same reason `(code) @none` sits below
-; the `@text.literal` block above rather than outranking it. The upstream
-; priorities are redundant with that order: 100 < 105 < 110 is the order the
-; patterns are already written in, so dropping them changes no outcome. Keep any
-; new pattern in this block below the generic `@type` line.
-((div
-  class: (class_name) @type.builtin
-  !title
-  !label)
-  (#eq? @type.builtin "figure"))
-
-; GROUPS DO NOT NEST: a bare `::: figure` inside an open group is a generic
-; container, not an inner group, at any depth. A query has no transitive closure
-; - there is no "any descendant" - so the reach is spelled as wildcard chains
-; rooted at the group, one per intervening level, each restoring `@type` on the
-; inner opener from below the pattern above.
-;
-; Three levels covers every shape the language produces: a direct child of the
-; group's content; one intervening container (`div` > `content` > `div`, and
-; `block_quote` > `content` > `div`); and a list item
-; (`list` > `list_item` > `list_item_content` > `div`). The wildcards are
-; deliberate - naming the container types would have to be revisited every time
-; a block gains a content field, and the chain LENGTH is the real constraint.
-;
-; RESIDUAL, written down rather than left to be rediscovered: a bare opener
-; reached through more than three levels - a quote inside a list item inside the
-; group, say - keeps the group capture. The parse tree is right either way; only
-; the color is not.
-((div
-  class: (class_name) @_group.class
-  !title
-  !label
-  content: (content
-    (div
-      class: (class_name) @type
-      !title
-      !label)))
-  (#eq? @_group.class "figure")
-  (#eq? @type "figure"))
-
-((div
-  class: (class_name) @_group.class
-  !title
-  !label
-  content: (content
-    (_
-      (_
-        (div
-          class: (class_name) @type
-          !title
-          !label)))))
-  (#eq? @_group.class "figure")
-  (#eq? @type "figure"))
-
-((div
-  class: (class_name) @_group.class
-  !title
-  !label
-  content: (content
-    (_
-      (_
-        (_
-          (div
-            class: (class_name) @type
-            !title
-            !label))))))
-  (#eq? @_group.class "figure")
-  (#eq? @type "figure"))
+; The group caption needs no rule: it is an ordinary `^ ` line one line below
+; the closing fence, and the parser places it as a SIBLING of the container.
+(figure_group_marker) @type.builtin
 
 (identifier) @tag
 (key_value "=" @operator)
@@ -337,9 +279,20 @@
   (link_destination)
 ] @link_uri
 
+; A crossref with auto text is a LINK but not a URL: the renderer resolves the
+; heading id to the target's own text, so it takes @link_text rather than the
+; @link_uri above. It used to parse as an autolink and take that capture, which
+; colored a crossref as a web address.
+(auto_text_link) @link_text
+
 ; Footnotes.
 (footnote (reference_label) @link_text)
 (footnote_reference (reference_label) @link_text)
+
+; An inline note, `^[content]`. Its content is ordinary inline and colors
+; itself, so this marks the note as a whole - where it ends is the thing the
+; construct is easy to get wrong about.
+(inline_note) @link_text
 [
   (footnote_marker_begin)
   (footnote_marker_end)
