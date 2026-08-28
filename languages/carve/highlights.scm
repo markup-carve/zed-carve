@@ -94,6 +94,7 @@
   (list_marker_dash)
   (list_marker_star)
   (list_marker_definition)
+  (list_marker_description)
   (list_marker_decimal_period)
   (list_marker_decimal_paren)
   (list_marker_decimal_parens)
@@ -110,6 +111,11 @@
   (list_marker_upper_roman_paren)
   (list_marker_upper_roman_parens)
 ] @punctuation.special
+
+; The `+` list and block-quote continuation marker (PART 9 SS17). It attaches
+; the next flush-left block to the item above it, so it is a list marker even
+; though it opens no item of its own.
+(list_continuation_marker) @punctuation.special
 
 (list_marker_task (unchecked)) @punctuation.special
 (list_marker_task (checked)) @punctuation.special
