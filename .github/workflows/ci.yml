@@ -152,6 +152,27 @@ jobs:
       - name: git diff --check
         run: git diff --check "$(git hash-object -t tree /dev/null)" HEAD
 
+  rust-lint:
+    name: Rust format and lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out extension
+        uses: actions/checkout@v7
+
+      # There is no rustfmt.toml, so this is the toolchain default width. The
+      # signature in src/lib.rs was split under an older default and stayed
+      # split because nothing here noticed.
+      - name: cargo fmt --check
+        run: cargo fmt --check
+
+      # Lint on the only target the extension is ever compiled for; a lint that
+      # fires on the host but not on wasm32-wasip2 would be noise.
+      - name: Install wasm32-wasip2 target
+        run: rustup target add wasm32-wasip2
+
+      - name: cargo clippy
+        run: cargo clippy --release --target wasm32-wasip2 --all-targets -- -D warnings
+
   build-wasm:
     name: Build extension WASM
     runs-on: ubuntu-latest
