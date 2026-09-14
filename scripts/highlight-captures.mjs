@@ -60,6 +60,14 @@ const NOT_A_COLOR = new Set(['none', 'conceal', 'spell', 'nospell']);
  */
 const INCLUDE_DIRECTIVE = 'See {{ chapters/intro.crv #intro @level:2 }} here.\n';
 
+/*
+ * The quoted-option-value rows below each read a single directive, so the
+ * columns in their comments stay in step with one line of source.
+ */
+const QUOTED_OPTION_DIRECTIVE = '{{ ch.crv @label:"two words" }}\n';
+const QUOTED_HASH_DIRECTIVE = '{{ ch.crv @label:"a #tag" }}\n';
+const UNTERMINATED_QUOTE_DIRECTIVE = '{{ ch.crv @label:"two words }}\n';
+
 const CASES = [
     {
         name: 'a bare figure opener is a composite figure',
@@ -287,6 +295,63 @@ const CASES = [
      * is required on both sides, so `{{unpadded}}` is ordinary text and there is
      * no directive node to color.
      */
+    /*
+     * A QUOTED OPTION VALUE (markup-carve/tree-sitter-carve#288). An option
+     * value is an `attribute_value`, so a quoted one holding a space is ONE
+     * value. Before that grammar fix it stopped at the first space: the value
+     * scoped `"two` and `words"` fell into the tolerant `include_extra`, which
+     * carries no capture here - half a value painted, the rest bare.
+     *
+     *   {{ ch.crv @label:"two words" }}
+     *   0  3      10    16 17       28
+     *
+     * The span is the whole point, so these rows name `end` as well as the
+     * color: the name alone stays `constant` either way.
+     */
+    {
+        name: 'a quoted option value holding a space is one value',
+        source: QUOTED_OPTION_DIRECTIVE,
+        at: [0, 17],
+        expect: 'constant',
+        end: [0, 28],
+    },
+    /*
+     * With a `#` inside the quotes the old reading did not merely paint short -
+     * `#tag"` is no `include_extra` either, so the directive did not parse at
+     * all and both halves fell back to inline rules. `@label` read as a mention
+     * and `#tag` as a hashtag, inside a construct the core leaves literal.
+     *
+     *   {{ ch.crv @label:"a #tag" }}
+     *   0  3      10    16 17 20 25
+     */
+    {
+        name: 'the option name of a directive with a quoted # is a variable, NOT a mention',
+        source: QUOTED_HASH_DIRECTIVE,
+        at: [0, 10],
+        expect: 'variable',
+    },
+    {
+        name: 'a # inside a quoted option value is not a tag',
+        source: QUOTED_HASH_DIRECTIVE,
+        at: [0, 20],
+        expect: null,
+    },
+    /*
+     * The control on the widening: the quoted alternatives require their
+     * closing quote, so an unterminated one falls back to the unquoted run and
+     * still stops at the space. A value that ran to the closer instead would
+     * pass every row above.
+     *
+     *   {{ ch.crv @label:"two words }}
+     *   0  3      10    16 17   21
+     */
+    {
+        name: 'control: an unterminated quote still stops at the space',
+        source: UNTERMINATED_QUOTE_DIRECTIVE,
+        at: [0, 17],
+        expect: 'constant',
+        end: [0, 21],
+    },
     {
         name: 'control: a tag outside a directive is still a tag',
         source: 'see #intro here\n',
@@ -344,9 +409,18 @@ try {
             byFile.set(current, []);
             continue;
         }
-        const match = /capture:\s*\d+\s*-\s*([\w.]+),\s*start:\s*\((\d+),\s*(\d+)\)/.exec(line);
+        const match =
+            /capture:\s*\d+\s*-\s*([\w.]+),\s*start:\s*\((\d+),\s*(\d+)\),\s*end:\s*\((\d+),\s*(\d+)\)/.exec(
+                line,
+            );
         if (match && current) {
-            byFile.get(current).push({ name: match[1], row: Number(match[2]), column: Number(match[3]) });
+            byFile.get(current).push({
+                name: match[1],
+                row: Number(match[2]),
+                column: Number(match[3]),
+                endRow: Number(match[4]),
+                endColumn: Number(match[5]),
+            });
         }
     }
 
@@ -368,6 +442,21 @@ try {
             fails.push(
                 `FAIL ${testCase.name}\n   at ${row}:${column} the winning capture is ${got}, expected ${testCase.expect}`,
             );
+            return;
+        }
+        /*
+         * A capture name alone cannot see how FAR a capture reaches, and a
+         * value that stops early keeps its name while painting half the run.
+         * A case names `end` only when the span is the thing under test.
+         */
+        if (testCase.end) {
+            const [endRow, endColumn] = testCase.end;
+            if (winner.endRow !== endRow || winner.endColumn !== endColumn) {
+                fails.push(
+                    `FAIL ${testCase.name}\n   at ${row}:${column} the ${got} capture ends at ` +
+                        `${winner.endRow}:${winner.endColumn}, expected ${endRow}:${endColumn}`,
+                );
+            }
         }
     });
 
