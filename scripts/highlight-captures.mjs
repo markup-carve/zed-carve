@@ -51,6 +51,15 @@ const NOT_A_COLOR = new Set(['none', 'conceal', 'spell', 'nospell']);
  * node by where it starts, because the whole point is which of two
  * same-looking kind words gets which color.
  */
+/*
+ * The one directive every include row reads, so the columns below stay in step
+ * with a single line of source.
+ *
+ *   See {{ chapters/intro.crv #intro @level:2 }} here.
+ *   0   4  7                  26     33     40 42
+ */
+const INCLUDE_DIRECTIVE = 'See {{ chapters/intro.crv #intro @level:2 }} here.\n';
+
 const CASES = [
     {
         name: 'a bare figure opener is a composite figure',
@@ -215,6 +224,80 @@ const CASES = [
         source: '- item\n+\nan attached block\n',
         at: [1, 0],
         expect: 'punctuation.special',
+    },
+
+    /*
+     * THE RESERVED INCLUDE DIRECTIVE (PART 9 section 19, markup-carve/carve#291).
+     * `#section` is tag syntax and an option slot is mention syntax, so the rows
+     * that matter are the two NEGATIVE ones: before the grammar bump the pinned
+     * parser produced `(tag [0, 26] - [0, 32])` and `(mention [0, 33] - [0, 39])`
+     * for the source below, and the query file painted them as such - a selector
+     * inside a construct the core leaves literal, colored as a hashtag.
+     *
+     * Every position is a part's own start, so each row is a pattern that can
+     * win. `include_option` starts where `include_option_name` does and carries
+     * no capture, which is why the option row reads the name's color.
+     */
+    {
+        name: 'the include opener is punctuation',
+        source: INCLUDE_DIRECTIVE,
+        at: [0, 4],
+        expect: 'punctuation.special',
+    },
+    {
+        name: 'the include path is a path, not prose',
+        source: INCLUDE_DIRECTIVE,
+        at: [0, 7],
+        expect: 'string.special',
+    },
+    {
+        name: 'the include section selector is a label, NOT a tag',
+        source: INCLUDE_DIRECTIVE,
+        at: [0, 26],
+        expect: 'label',
+    },
+    {
+        name: 'an include option name is a variable, NOT a mention',
+        source: INCLUDE_DIRECTIVE,
+        at: [0, 33],
+        expect: 'variable',
+    },
+    {
+        name: 'the include option separator is a delimiter',
+        source: INCLUDE_DIRECTIVE,
+        at: [0, 39],
+        expect: 'punctuation.delimiter',
+    },
+    {
+        name: 'the include option value is a constant',
+        source: INCLUDE_DIRECTIVE,
+        at: [0, 40],
+        expect: 'constant',
+    },
+    {
+        name: 'the include closer is punctuation',
+        source: INCLUDE_DIRECTIVE,
+        at: [0, 42],
+        expect: 'punctuation.special',
+    },
+    /*
+     * The controls. The first proves the tag rule still paints a tag where a tag
+     * really is - a fix that simply dropped `(tag) @tag` would pass every row
+     * above. The second proves the directive rules reach nothing else: padding
+     * is required on both sides, so `{{unpadded}}` is ordinary text and there is
+     * no directive node to color.
+     */
+    {
+        name: 'control: a tag outside a directive is still a tag',
+        source: 'see #intro here\n',
+        at: [0, 4],
+        expect: 'tag',
+    },
+    {
+        name: 'control: an unpadded brace pair is not a directive',
+        source: 'Not {{unpadded}} a directive\n',
+        at: [0, 4],
+        expect: null,
     },
 ];
 

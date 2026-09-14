@@ -96,3 +96,8 @@ Can span multiple paragraphs.
 %%%%
 
 %% Inline short comment.
+
+## Reserved processor syntax
+
+See {{ chapters/intro.crv #intro }} for the opening, and
+{{ "docs/appendix b.crv" #tables @level:2 }} for the tables.
