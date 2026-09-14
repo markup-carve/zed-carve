@@ -150,6 +150,30 @@
 (strikethrough) @emphasis
 (symbol) @string.special.symbol
 (extension_inline) @keyword
+
+; The reserved include directive, `{{ path #section @opt:value }}` (PART 9
+; section 19, markup-carve/carve#291). The grammar reads it BY PART since
+; markup-carve/tree-sitter-carve#285, which is what keeps `#section` away from
+; the `(tag)` rule below and an option away from `(mention)`: both lines match
+; that spelling, so before the bump the selector of a construct the core leaves
+; LITERAL painted as a hashtag.
+;
+; Ported from upstream `queries/highlights.scm`, truncated to the capture names
+; Zed paints: `string.special.path` has no Zed key and resolves to
+; @string.special, `variable.parameter` to @variable. There is deliberately no
+; whole-node `(include_directive)` capture - it starts at the same position as
+; `(include_open)`, so no order of the two is both testable by
+; scripts/highlight-captures.mjs and non-overriding of the parts in Zed.
+[
+  (include_open)
+  (include_close)
+] @punctuation.special
+(include_path) @string.special
+(include_section) @label
+(include_option_name) @variable
+(include_option_separator) @punctuation.delimiter
+(include_option_value) @constant
+
 (mention) @link_text
 (tag) @tag
 (insert) @emphasis
