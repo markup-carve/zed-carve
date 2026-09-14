@@ -14,10 +14,7 @@ impl CarveExtension {
         fs::metadata(SERVER_PATH).is_ok_and(|stat| stat.is_file())
     }
 
-    fn server_script_path(
-        &mut self,
-        language_server_id: &zed::LanguageServerId,
-    ) -> Result<String> {
+    fn server_script_path(&mut self, language_server_id: &zed::LanguageServerId) -> Result<String> {
         let server_exists = self.server_exists();
         if self.did_find_server && server_exists {
             return Ok(SERVER_PATH.to_string());
