@@ -67,6 +67,7 @@ const INCLUDE_DIRECTIVE = 'See {{ chapters/intro.crv #intro @level:2 }} here.\n'
 const QUOTED_OPTION_DIRECTIVE = '{{ ch.crv @label:"two words" }}\n';
 const QUOTED_HASH_DIRECTIVE = '{{ ch.crv @label:"a #tag" }}\n';
 const UNTERMINATED_QUOTE_DIRECTIVE = '{{ ch.crv @label:"two words }}\n';
+const PAIR_IN_QUOTED_VALUE_DIRECTIVE = '{{ ch.crv @label:"a }} b" }} tail\n';
 
 const CASES = [
     {
@@ -335,6 +336,35 @@ const CASES = [
         source: QUOTED_HASH_DIRECTIVE,
         at: [0, 20],
         expect: null,
+    },
+    /*
+     * THE PAIR INSIDE A QUOTED RUN (markup-carve/carve#2013). A quoted run may
+     * hold `}}`, and the directive's closer is the first pair OUTSIDE any run.
+     * The pinned grammar admits `}` in the quoted alternatives, so the value
+     * reaches its closing quote and the closer is the later pair.
+     *
+     *   {{ ch.crv @label:"a }} b" }} tail
+     *   0  3      10    16 17     25 26
+     *
+     * Both rows name a span or a position the superseded reading puts
+     * elsewhere, which is what makes them discriminate: under the old pin the
+     * value stopped at `"a` (17-19) and the pair at column 20 was the closer,
+     * leaving `b" }} tail` as ordinary text. The capture NAME alone is the same
+     * `constant` either way, so the value row asserts `end` - without it the row
+     * would be green under both readings and pin nothing.
+     */
+    {
+        name: 'a quoted option value may hold the }} pair',
+        source: PAIR_IN_QUOTED_VALUE_DIRECTIVE,
+        at: [0, 17],
+        expect: 'constant',
+        end: [0, 25],
+    },
+    {
+        name: 'the closer is the pair outside the quoted run',
+        source: PAIR_IN_QUOTED_VALUE_DIRECTIVE,
+        at: [0, 26],
+        expect: 'punctuation.special',
     },
     /*
      * The control on the widening: the quoted alternatives require their
