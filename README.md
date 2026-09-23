@@ -44,8 +44,11 @@ the file. The actions need a carve-lsp release newer than 0.1.7.
 
 ### Import from Markdown or HTML
 
-Converting the other way uses the `carve migrate` CLI, which prints the Carve
-source to stdout. Add a task to `~/.config/zed/tasks.json`:
+Converting the other way uses `carve migrate`, which prints the Carve source to
+stdout. It needs the `carve` CLI on PATH, for example from `cargo install
+carve-lang`. The npm package does not work for this yet: `npx` and its
+installed `carve` exit without output until a carve-js entry-point bug is fixed.
+Add a task to `~/.config/zed/tasks.json`:
 
 ```json
 [
@@ -54,7 +57,7 @@ source to stdout. Add a task to `~/.config/zed/tasks.json`:
     "command": "sh",
     "args": [
       "-c",
-      "npx -y @markup-carve/carve migrate --from markdown \"$ZED_FILE\" > \"$ZED_DIRNAME/$ZED_STEM.crv\""
+      "carve migrate --from markdown \"$ZED_FILE\" > \"$ZED_DIRNAME/$ZED_STEM.crv\""
     ],
     "use_new_terminal": false,
     "reveal": "no_focus"
