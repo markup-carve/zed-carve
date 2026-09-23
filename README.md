@@ -32,6 +32,43 @@ grammar.
   comments.
 - Carve file association for `.crv`.
 
+## Export and import
+
+### Export to Markdown or HTML
+
+carve-lsp offers two code actions on a `.crv` file, **Export as Markdown** and
+**Export as HTML**. Open the code actions menu (`ctrl-.` on Linux and Windows,
+`cmd-.` on macOS) and pick one. Zed applies the edit as an unsaved buffer
+(`notes.md` or `notes.html` next to `notes.crv`), so save that buffer to write
+the file. The actions need a carve-lsp release newer than 0.1.7.
+
+### Import from Markdown or HTML
+
+Converting the other way uses `carve migrate`, which prints the Carve source to
+stdout. It needs the `carve` CLI on PATH, for example from `cargo install
+carve-lang`. The npm package does not work for this yet: `npx` and its
+installed `carve` exit without output until a carve-js entry-point bug is fixed.
+Add a task to `~/.config/zed/tasks.json`:
+
+```json
+[
+  {
+    "label": "Carve: import Markdown as .crv",
+    "command": "sh",
+    "args": [
+      "-c",
+      "carve migrate --from markdown \"$ZED_FILE\" > \"$ZED_DIRNAME/$ZED_STEM.crv\""
+    ],
+    "use_new_terminal": false,
+    "reveal": "no_focus"
+  }
+]
+```
+
+With a `.md` file open, run **task: spawn** and pick the task. It writes
+`notes.crv` next to `notes.md` and overwrites an existing one without asking.
+For HTML, copy the task and use `--from html`.
+
 ## Installation
 
 Install **Carve** from the [Zed extension registry](https://zed.dev/extensions/carve)
