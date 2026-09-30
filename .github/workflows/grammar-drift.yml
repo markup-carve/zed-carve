@@ -13,6 +13,12 @@ name: Grammar drift
 # This job is the one check that looks OUTWARD. A pin behind upstream main
 # fails it: a warning on a green run went unread while the pin fell behind.
 # The fix for a red run is a re-vendor pull request.
+#
+# A red SCHEDULED run is itself unread. This one went red on 2026-09-23 and
+# stayed red for a week while two pull requests merged green, because a
+# schedule failure appears on no pull request and sends no notification the
+# maintainer sees. So the job now files its own tracking issue, and keeps one
+# issue rather than one per day.
 
 on:
   schedule:
@@ -26,6 +32,8 @@ on:
 
 permissions:
   contents: read
+  # Needed only by the step that reports a red run as an issue.
+  issues: write
 
 jobs:
   grammar-pin:
@@ -41,6 +49,7 @@ jobs:
           fetch-depth: 0
 
       - name: Compare the pinned revision against tree-sitter-carve main
+        id: compare
         env:
           REV_OVERRIDE: ${{ inputs.rev }}
         run: |
@@ -48,22 +57,53 @@ jobs:
           rev="${REV_OVERRIDE:-}"
           [ -n "${rev}" ] || rev="$(sed -n '/^\[grammars\.carve\]/,/^\[/p' extension.toml \
                  | grep -oE 'rev *= *"[0-9a-f]{40}"' | grep -oE '[0-9a-f]{40}' | head -1)"
-          if [ -z "${rev}" ]; then
-            echo "::error::extension.toml: [grammars.carve] has no 40-hex rev"
+          fail() {
+            printf '%s\n' "$1" > "${RUNNER_TEMP}/drift-reason.txt"
+            echo "::error::$1"
             exit 1
+          }
+          if [ -z "${rev}" ]; then
+            fail "extension.toml: [grammars.carve] has no 40-hex rev"
           fi
           if ! git -C tree-sitter-carve cat-file -e "${rev}^{commit}" 2>/dev/null; then
-            echo "::error::the grammar pins ${rev}, which is not a commit in markup-carve/tree-sitter-carve"
-            exit 1
+            fail "the grammar pins ${rev}, which is not a commit in markup-carve/tree-sitter-carve"
           fi
           if ! git -C tree-sitter-carve merge-base --is-ancestor "${rev}" origin/main; then
-            echo "::error::grammar ${rev} is not on main, so the pin came from an unmerged or rewritten branch"
-            exit 1
+            fail "grammar ${rev} is not on main, so the pin came from an unmerged or rewritten branch"
           fi
           behind="$(git -C tree-sitter-carve rev-list --count "${rev}..origin/main")"
           echo "grammar pin: ${rev} ($(git -C tree-sitter-carve log -1 --format=%s "${rev}"))"
           echo "tree-sitter-carve main is ${behind} commit(s) ahead"
           if [ "${behind}" -gt 0 ]; then
-            echo "::error::the grammar pin ${rev} is ${behind} commit(s) behind tree-sitter-carve main $(git -C tree-sitter-carve rev-parse origin/main); re-vendor the grammar"
-            exit 1
+            fail "the grammar pin ${rev} is ${behind} commit(s) behind tree-sitter-carve main $(git -C tree-sitter-carve rev-parse origin/main); re-vendor the grammar"
+          fi
+
+      # A schedule failure reaches nobody, so carry it into the backlog, which
+      # is read. One issue is reused across runs: a daily new issue would be
+      # noise, and noise is how the last red week stayed unread.
+      - name: Report a red run as an issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TITLE: "Grammar drift is red: the pinned tree-sitter-carve revision needs re-vendoring"
+        run: |
+          set -euo pipefail
+          reason="$(cat "${RUNNER_TEMP}/drift-reason.txt" 2>/dev/null || true)"
+          [ -n "${reason}" ] || reason="the Grammar drift run failed before it could compare the pin"
+          {
+            printf '%s\n\n' "${reason}"
+            printf 'Run: %s\n\n' "${RUN_URL}"
+            printf 'The fix is a pull request that moves the `[grammars.carve]` rev in\n'
+            printf '`extension.toml` onto `markup-carve/tree-sitter-carve` main, and re-runs the\n'
+            printf 'query and fixture gates against it.\n'
+          } > "${RUNNER_TEMP}/body.md"
+          existing="$(gh issue list --repo "${REPO}" --state open --search "${TITLE} in:title" \
+                        --json number,title --jq "map(select(.title == \"${TITLE}\")) | .[0].number // empty")"
+          if [ -n "${existing}" ]; then
+            gh issue comment "${existing}" --repo "${REPO}" --body-file "${RUNNER_TEMP}/body.md"
+          else
+            gh issue create --repo "${REPO}" --title "${TITLE}" --body-file "${RUNNER_TEMP}/body.md" \
+              --label chore --label area:grammar --label area:editor
           fi

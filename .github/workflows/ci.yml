@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # tree-sitter-cli version. Matches the grammar's devDependency.
-      TS_CLI: tree-sitter-cli@0.22.1
+      TS_CLI: tree-sitter-cli@0.22.6
     steps:
       - name: Check out extension
         uses: actions/checkout@v7
