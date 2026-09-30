@@ -1,6 +1,6 @@
 id = "carve"
 name = "Carve"
-description = "Syntax highlighting for Carve, a post-Markdown lightweight markup language"
+description = "Syntax highlighting for Carve, a lightweight markup language for documents"
 version = "0.1.3"
 schema_version = 1
 authors = ["Mark Scherer <dereuromark@users.noreply.github.com>"]
