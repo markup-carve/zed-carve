@@ -1,7 +1,7 @@
 # zed-carve
 
 Zed editor support for [Carve](https://markup-carve.github.io/carve/), a
-lightweight markup language for documents.
+lightweight markup language for documents and the web.
 
 This extension provides syntax highlighting, language server integration,
 bracket behavior, injections, and outline support for `.crv` files.
