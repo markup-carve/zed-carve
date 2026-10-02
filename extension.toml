@@ -13,7 +13,7 @@ capabilities = []
 
 [grammars.carve]
 repository = "https://github.com/markup-carve/tree-sitter-carve"
-rev = "8fe9f7658664bee6c49ee2956d79fd187a3a262e"
+rev = "3d8a856b33b018fa6c293cda07dda1ffef189617"
 
 [language_servers.carve-lsp]
 name = "Carve LSP"
