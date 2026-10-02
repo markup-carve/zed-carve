@@ -8,10 +8,14 @@ on:
 permissions:
   contents: read
 
+# Every job declares timeout-minutes. Without one GitHub applies a 360-minute
+# default, roughly 900x the median job in this org, so a hung step burns hours
+# of runner time before anything stops it.
 jobs:
   validate:
     name: Validate manifest, grammar, and queries
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       # tree-sitter-cli version. Matches the grammar's devDependency.
       TS_CLI: tree-sitter-cli@0.22.6
@@ -155,6 +159,7 @@ jobs:
   rust-lint:
     name: Rust format and lint
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Check out extension
         uses: actions/checkout@v7
@@ -176,6 +181,7 @@ jobs:
   build-wasm:
     name: Build extension WASM
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Check out extension
         uses: actions/checkout@v7
