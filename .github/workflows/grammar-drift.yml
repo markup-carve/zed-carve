@@ -10,15 +10,14 @@ name: Grammar drift
 # differently between the two revisions - including five the pinned grammar
 # could not parse without an ERROR node at all.
 #
-# This job is the one check that looks OUTWARD. A pin behind upstream main
-# fails it: a warning on a green run went unread while the pin fell behind.
-# The fix for a red run is a re-vendor pull request.
+# Upstream moving is work, not a failure of this repo (carve#2706), so a pin
+# behind main opens or updates one re-vendor pull request and the run stays
+# green. BUMP_TOKEN is a fine-grained PAT rather than the default token,
+# because a pull request the default token opens does not trigger CI.
 #
-# A red SCHEDULED run is itself unread. This one went red on 2026-09-23 and
-# stayed red for a week while two pull requests merged green, because a
-# schedule failure appears on no pull request and sends no notification the
-# maintainer sees. So the job now files its own tracking issue, and keeps one
-# issue rather than one per day.
+# The run goes red only when the check itself cannot do its job: an invalid
+# pin, a missing BUMP_TOKEN, or a failed push. A red SCHEDULED run reaches
+# nobody, so that case files one tracking issue, reused across runs.
 
 on:
   schedule:
@@ -35,6 +34,10 @@ permissions:
   # Needed only by the step that reports a red run as an issue.
   issues: write
 
+concurrency:
+  group: grammar-drift
+  cancel-in-progress: false
+
 # Every job declares timeout-minutes. Without one GitHub applies a 360-minute
 # default, roughly 900x the median job in this org, so a hung step burns hours
 # of runner time before anything stops it.
@@ -44,6 +47,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Check out the grammar
         uses: actions/checkout@v7
@@ -78,8 +83,71 @@ jobs:
           behind="$(git -C tree-sitter-carve rev-list --count "${rev}..origin/main")"
           echo "grammar pin: ${rev} ($(git -C tree-sitter-carve log -1 --format=%s "${rev}"))"
           echo "tree-sitter-carve main is ${behind} commit(s) ahead"
-          if [ "${behind}" -gt 0 ]; then
-            fail "the grammar pin ${rev} is ${behind} commit(s) behind tree-sitter-carve main $(git -C tree-sitter-carve rev-parse origin/main); re-vendor the grammar"
+          {
+            echo "rev=${rev}"
+            echo "behind=${behind}"
+            echo "head=$(git -C tree-sitter-carve rev-parse origin/main)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open or update the re-vendor pull request
+        if: steps.compare.outputs.behind != '0' && inputs.rev == ''
+        env:
+          GH_TOKEN: ${{ secrets.BUMP_TOKEN }}
+          REPO: ${{ github.repository }}
+          OLD: ${{ steps.compare.outputs.rev }}
+          NEW: ${{ steps.compare.outputs.head }}
+          BEHIND: ${{ steps.compare.outputs.behind }}
+          BASE: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN}" ]; then
+            msg="BUMP_TOKEN is not set, so the drift job cannot open the re-vendor pull request"
+            printf '%s\n' "${msg}" > "${RUNNER_TEMP}/drift-reason.txt"
+            echo "::error::${msg}"
+            exit 1
+          fi
+          branch=automation/revendor-grammar
+          short="${NEW:0:7}"
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+
+          # An open pull request already carrying this revision needs nothing;
+          # pushing again would only restart its CI.
+          if git ls-remote --exit-code "${remote}" "refs/heads/${branch}" >/dev/null; then
+            git fetch -q "${remote}" "${branch}"
+            if git show FETCH_HEAD:extension.toml | grep -q "${NEW}"; then
+              echo "${branch} already pins ${NEW}; nothing to do."
+              exit 0
+            fi
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -q -B "${branch}"
+          sed -i "s/${OLD}/${NEW}/g" extension.toml
+          git commit -q -am "chore: move the grammar pin to tree-sitter-carve ${short}"
+          git push -q --force "${remote}" "${branch}"
+
+          {
+            echo "Moves the \`extension.toml\` grammar pin from \`${OLD:0:7}\` to tree-sitter-carve main \`${short}\`, ${BEHIND} commit(s) ahead."
+            echo
+            echo "Opened by the scheduled grammar-drift job. CI builds the new revision and checks the queries and fixtures against it; a red run here means they name something the grammar changed."
+            echo
+            echo "Upstream commits in this move:"
+            echo
+            echo '```text'
+            git -C tree-sitter-carve log --format='%h %s' "${OLD}..${NEW}"
+            echo '```'
+          } > "${RUNNER_TEMP}/body.md"
+
+          pr="$(gh pr list --repo "${REPO}" --head "${branch}" --state open --json number --jq '.[0].number // empty')"
+          title="chore: move the grammar pin to tree-sitter-carve ${short}"
+          if [ -n "${pr}" ]; then
+            gh pr edit "${pr}" --repo "${REPO}" --title "${title}" --body-file "${RUNNER_TEMP}/body.md"
+            echo "Updated #${pr}."
+          else
+            gh pr create --repo "${REPO}" --base "${BASE}" --head "${branch}" \
+              --title "${title}" --body-file "${RUNNER_TEMP}/body.md" \
+              --label chore --label area:grammar --label area:editor
           fi
 
       # A schedule failure reaches nobody, so carry it into the backlog, which
@@ -91,7 +159,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          TITLE: "Grammar drift is red: the pinned tree-sitter-carve revision needs re-vendoring"
+          TITLE: "Grammar drift check is failing: it cannot compare the pin or open the re-vendor pull request"
         run: |
           set -euo pipefail
           reason="$(cat "${RUNNER_TEMP}/drift-reason.txt" 2>/dev/null || true)"
@@ -99,9 +167,8 @@ jobs:
           {
             printf '%s\n\n' "${reason}"
             printf 'Run: %s\n\n' "${RUN_URL}"
-            printf 'The fix is a pull request that moves the `[grammars.carve]` rev in\n'
-            printf '`extension.toml` onto `markup-carve/tree-sitter-carve` main, and re-runs the\n'
-            printf 'query and fixture gates against it.\n'
+            printf 'A pin behind main does not fail this job; it opens a re-vendor pull request.\n'
+            printf 'This run failed because the check itself could not do that.\n'
           } > "${RUNNER_TEMP}/body.md"
           existing="$(gh issue list --repo "${REPO}" --state open --search "${TITLE} in:title" \
                         --json number,title --jq "map(select(.title == \"${TITLE}\")) | .[0].number // empty")"
