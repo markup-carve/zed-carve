@@ -66,6 +66,9 @@ const INCLUDE_DIRECTIVE = 'See {{ chapters/intro.crv #intro @level:2 }} here.\n'
  */
 const QUOTED_OPTION_DIRECTIVE = '{{ ch.crv @label:"two words" }}\n';
 const QUOTED_HASH_DIRECTIVE = '{{ ch.crv @label:"a #tag" }}\n';
+const GLUED_OPTION_DIRECTIVE = 'See {{ ch.crv@shift:auto }} here.\n';
+const GLUED_SELECTOR_AND_OPTION_DIRECTIVE = 'See {{ ch.crv#Intro@shift:auto }} here.\n';
+const PADDED_SELECTOR_GLUED_OPTION_DIRECTIVE = 'See {{ ch.crv #Intro@shift:auto }} here.\n';
 const UNTERMINATED_QUOTE_DIRECTIVE = '{{ ch.crv @label:"two words }}\n';
 const PAIR_IN_QUOTED_VALUE_DIRECTIVE = '{{ ch.crv @label:"a }} b" }} tail\n';
 
@@ -288,6 +291,57 @@ const CASES = [
         source: INCLUDE_DIRECTIVE,
         at: [0, 42],
         expect: 'punctuation.special',
+    },
+    /*
+     * AN OPTION MARKER THAT TOUCHES WHAT PRECEDES IT (markup-carve/carve#2775).
+     * The rows above pad every part, so none of them can see a marker glued to
+     * the path or to a selector. At the grammar revision pinned before #64 all
+     * three sources below produced no directive at all, and the third returned
+     * a `tag` node for its selector - a selector inside a directive painted as
+     * a hashtag, which is what the rows above exist to prevent.
+     *
+     *   See {{ ch.crv@shift:auto }} here.
+     *   0   4  7     13    19
+     *   See {{ ch.crv#Intro@shift:auto }} here.
+     *   0   4  7     13    19    25
+     *   See {{ ch.crv #Intro@shift:auto }} here.
+     *   0   4  7      14    20    26
+     */
+    {
+        name: 'an option glued to the path is a variable, not prose',
+        source: GLUED_OPTION_DIRECTIVE,
+        at: [0, 13],
+        expect: 'variable',
+    },
+    {
+        name: 'the value of an option glued to the path is a constant',
+        source: GLUED_OPTION_DIRECTIVE,
+        at: [0, 20],
+        expect: 'constant',
+    },
+    {
+        name: 'a glued selector before a glued option is a label, NOT a tag',
+        source: GLUED_SELECTOR_AND_OPTION_DIRECTIVE,
+        at: [0, 13],
+        expect: 'label',
+    },
+    {
+        name: 'an option glued to a glued selector is a variable',
+        source: GLUED_SELECTOR_AND_OPTION_DIRECTIVE,
+        at: [0, 19],
+        expect: 'variable',
+    },
+    {
+        name: 'a padded selector before a glued option is a label, NOT a tag',
+        source: PADDED_SELECTOR_GLUED_OPTION_DIRECTIVE,
+        at: [0, 14],
+        expect: 'label',
+    },
+    {
+        name: 'an option glued to a padded selector is a variable',
+        source: PADDED_SELECTOR_GLUED_OPTION_DIRECTIVE,
+        at: [0, 20],
+        expect: 'variable',
     },
     /*
      * The controls. The first proves the tag rule still paints a tag where a tag
