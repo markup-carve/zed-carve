@@ -159,6 +159,14 @@ jobs:
 
       # main requires its checks and an up-to-date branch, so auto-merge waits for
       # this repo's CI. GitHub never updates a BEHIND branch itself, so do it here.
+      # Enabling auto-merge is a CONVENIENCE on a pull request that already
+      # exists. The deliverable of a behind pin is the open re-vendor pull
+      # request, and the step is idempotent, so the next scheduled run picks up
+      # whatever this one could not finish. A GitHub-side API error here
+      # therefore warns; it does not fail the job. Run 37788950783 failed on a
+      # transient `GraphQL: Something went wrong while executing your query`
+      # after the pin had been compared and the pull request opened, and the
+      # red run then filed an issue saying the check could not compare the pin.
       - name: Merge the re-vendor pull request once its checks pass
         if: steps.revendor.outcome == 'success'
         env:
@@ -166,23 +174,48 @@ jobs:
           REPO: ${{ github.repository }}
           BRANCH: automation/revendor-grammar
         run: |
-          set -euo pipefail
-          pr="$(gh pr list --repo "${REPO}" --head "${BRANCH}" --state open --json number --jq '.[0].number // empty')"
+          set -uo pipefail
+          # Retries a transient API error; a real refusal still loses after the
+          # last attempt, and the caller decides what that means.
+          retry() {
+            attempt=1
+            while :; do
+              if "$@"; then
+                return 0
+              fi
+              if [ "${attempt}" -ge 4 ]; then
+                return 1
+              fi
+              echo "attempt ${attempt} of 4 failed: $*" >&2
+              attempt=$((attempt + 1))
+              sleep $((attempt * 5))
+            done
+          }
+          give_up() {
+            echo "::warning::${1}. The re-vendor pull request stays open and the next scheduled run retries."
+            exit 0
+          }
+
+          pr="$(retry gh pr list --repo "${REPO}" --head "${BRANCH}" --state open --json number --jq '.[0].number // empty')" \
+            || give_up "could not list the re-vendor pull request"
           if [ -z "${pr}" ]; then
             echo "No open re-vendor pull request."
             exit 0
           fi
           state=UNKNOWN
           for _ in 1 2 3 4 5; do
-            state="$(gh pr view "${pr}" --repo "${REPO}" --json mergeStateStatus --jq .mergeStateStatus)"
+            state="$(retry gh pr view "${pr}" --repo "${REPO}" --json mergeStateStatus --jq .mergeStateStatus)" \
+              || give_up "could not read the merge state of #${pr}"
             [ "${state}" = UNKNOWN ] || break
             sleep 5
           done
           if [ "${state}" = BEHIND ]; then
-            gh api "repos/${REPO}/pulls/${pr}/update-branch" -X PUT --silent
+            retry gh api "repos/${REPO}/pulls/${pr}/update-branch" -X PUT --silent \
+              || give_up "could not update #${pr} onto the default branch"
             echo "Updated #${pr} onto the default branch."
           fi
-          gh pr merge "${pr}" --repo "${REPO}" --squash --auto
+          retry gh pr merge "${pr}" --repo "${REPO}" --squash --auto \
+            || give_up "could not enable auto-merge on #${pr}"
           echo "Auto-merge (squash) enabled on #${pr}."
       - name: Report a red run as an issue
         if: failure()
@@ -190,16 +223,32 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          TITLE: "Grammar drift check is failing: it cannot compare the pin or open the re-vendor pull request"
+          TITLE: "Grammar drift check is failing"
+          COMPARE: ${{ steps.compare.outcome }}
+          REVENDOR: ${{ steps.revendor.outcome }}
         run: |
           set -euo pipefail
+          # Only the compare and re-vendor steps write a reason, so a failure
+          # anywhere else used to be reported as "failed before it could
+          # compare the pin" - which named the wrong stage and, in run
+          # 37788950783, was simply false: the pin had been compared and the
+          # output was in the log. Name the stage from the step outcomes.
           reason="$(cat "${RUNNER_TEMP}/drift-reason.txt" 2>/dev/null || true)"
-          [ -n "${reason}" ] || reason="the Grammar drift run failed before it could compare the pin"
+          if [ -z "${reason}" ]; then
+            if [ "${COMPARE}" != success ]; then
+              reason="the Grammar drift run failed while comparing the pin"
+            elif [ "${REVENDOR}" = failure ]; then
+              reason="the pin was compared, but the re-vendor pull request could not be opened or updated"
+            else
+              reason="the pin was compared and the re-vendor step did not fail, so the run failed in a later step - read the run log"
+            fi
+          fi
           {
             printf '%s\n\n' "${reason}"
             printf 'Run: %s\n\n' "${RUN_URL}"
             printf 'A pin behind main does not fail this job; it opens a re-vendor pull request.\n'
-            printf 'This run failed because the check itself could not do that.\n'
+            printf 'Enabling auto-merge on that pull request does not fail it either - that warns.\n'
+            printf 'So a red run here means a step could not do its job. The reason above names which.\n'
           } > "${RUNNER_TEMP}/body.md"
           existing="$(gh issue list --repo "${REPO}" --state open --search "${TITLE} in:title" \
                         --json number,title --jq "map(select(.title == \"${TITLE}\")) | .[0].number // empty")"
