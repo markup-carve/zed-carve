@@ -1,0 +1,242 @@
+name: Release
+
+# The tag is created by THIS workflow, after the gates pass and after a human
+# approves. Tags here are prefixed with v, matching every existing release.
+#
+# WHAT A RELEASE OF THIS REPOSITORY IS. There is no registry. A Zed extension
+# reaches users through a pull request against zed-industries/extensions that
+# bumps this extension's version and submodule pointer, which is a cross-
+# organization pull request and deliberately not automated here. So this lane
+# ends at the tag and the published release: the tag is what that pull request
+# points at, and it is the first and only irreversible act in this repository.
+# Opening the extensions pull request stays a manual step.
+#
+# The notes are published in this same run rather than by a second workflow
+# listening for the tag: a ref created with github.token does not trigger other
+# workflows, so a tag-triggered job would never fire.
+#
+# Every job declares timeout-minutes, so a hung step fails in minutes instead
+# of inheriting GitHub's 360-minute default.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, without a leading v (e.g. 0.1.5)'
+        required: true
+        type: string
+
+concurrency:
+  group: release-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    name: The tag is free and every version surface agrees
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: The tag does not exist yet
+        run: |
+          VER="${{ inputs.version }}"
+          if git rev-parse -q --verify "refs/tags/v${VER}" >/dev/null; then
+            echo "::error::Tag v${VER} already exists. Supersede it with a new version."
+            exit 1
+          fi
+
+      # Three surfaces, all shipped: extension.toml is what Zed reads,
+      # Cargo.toml is what the wasm build stamps, and Cargo.lock carries its own
+      # copy of the package version that a `cargo build` would otherwise fix up
+      # silently on the release runner.
+      - name: extension.toml, Cargo.toml and Cargo.lock declare this version
+        run: |
+          VER="${{ inputs.version }}" python3 - <<'PY'
+          import os, re, sys, tomllib
+          ver = os.environ["VER"]
+          bad = []
+
+          ext = tomllib.load(open("extension.toml", "rb")).get("version")
+          print(f"extension.toml: {ext}")
+          if ext != ver:
+              bad.append(f"extension.toml declares {ext}")
+
+          cargo = tomllib.load(open("Cargo.toml", "rb"))
+          name = cargo["package"]["name"]
+          crate = cargo["package"].get("version")
+          print(f"Cargo.toml:     {crate} (package {name})")
+          if crate != ver:
+              bad.append(f"Cargo.toml declares {crate}")
+
+          lock = tomllib.load(open("Cargo.lock", "rb"))
+          locked = [p.get("version") for p in lock.get("package", []) if p.get("name") == name]
+          print(f"Cargo.lock:     {locked}")
+          if locked != [ver]:
+              bad.append(f"Cargo.lock records {locked} for {name}")
+
+          if bad:
+              for line in bad:
+                  print(f"::error::{line}, but this run would release {ver}.")
+              sys.exit(1)
+          print(f"ok   all three surfaces declare {ver}")
+          PY
+
+      # The grammar pin is part of what a release ships: Zed fetches the grammar
+      # at this rev, so a branch name or a short hash makes two installs of the
+      # same tag different extensions.
+      - name: The grammar is pinned to a full commit
+        run: |
+          python3 - <<'PY'
+          import re, sys, tomllib
+          grammar = tomllib.load(open("extension.toml", "rb")).get("grammars", {}).get("carve")
+          if grammar is None:
+              sys.exit("::error::extension.toml has no [grammars.carve] section")
+          rev = grammar.get("rev")
+          if not isinstance(rev, str) or not re.fullmatch(r"[0-9a-f]{40}", rev):
+              sys.exit(f"::error::[grammars.carve] rev must be a 40-hex commit, got: {rev!r}")
+          print(f"ok   grammar pinned at {rev}")
+          PY
+
+      - name: The changelog describes this version
+        run: |
+          VER="${{ inputs.version }}"
+          if ! grep -qE "^## \[?${VER//./\\.}\]?" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no section for $VER."
+            exit 1
+          fi
+
+  release-notes:
+    name: A release draft for this version exists and has notes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      # `write`, not `read`: a DRAFT release is invisible to a caller without
+      # push access, so under `contents: read` the listing comes back empty and
+      # this reports "no draft" for a draft sitting right there with notes in it.
+      contents: write
+    steps:
+      # Listed rather than addressed by tag: a draft's tag is not a git ref, so
+      # `gh release view <tag>` can match nothing, change nothing and exit 0.
+      - name: The draft exists and has notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: v${{ inputs.version }}
+        run: |
+          release="$(gh api "repos/$REPO/releases" --paginate \
+            --jq "[.[] | select(.tag_name == \"$TAG\")] | first")"
+          if [ -z "$release" ]; then
+            echo "::error::no release draft for $TAG. Write the notes first."
+            echo "::error::if a draft DOES exist, this job could not see it - check that it still declares contents: write"
+            exit 1
+          fi
+          body="$(printf '%s' "$release" | jq -r '.body // ""' | tr -d '[:space:]')"
+          if [ -z "$body" ]; then
+            echo "::error::the release for $TAG has no notes."
+            exit 1
+          fi
+          printf '%s' "$release" | jq -r '"draft=\(.draft) tag=\(.tag_name)"'
+
+  tests:
+    name: The extension formats, lints and builds for wasm
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: cargo fmt --check
+        run: cargo fmt --check
+
+      # Zed compiles extensions for wasm32-wasip2, so that is the only target
+      # worth linting and the only one worth building.
+      - name: Install wasm32-wasip2 target
+        run: rustup target add wasm32-wasip2
+
+      - name: cargo clippy
+        run: cargo clippy --release --target wasm32-wasip2 --all-targets -- -D warnings
+
+      - name: Build
+        run: cargo build --release --target wasm32-wasip2
+
+      # The Cargo.lock check in `guard` only reads the file. A build that would
+      # rewrite it means the lock does not describe this tree, so the tag would
+      # ship a lock nobody has resolved.
+      - name: The build left Cargo.lock untouched
+        run: git diff --exit-code -- Cargo.lock
+
+      # The grammar and query validation in ci.yml is deliberately not repeated
+      # here: it clones the pinned grammar over the network, so a failure means
+      # the rev vanished or GitHub is down, neither of which is a reason to
+      # refuse a tag that main has already passed CI on.
+
+  tag:
+    name: Create the tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [guard, release-notes, tests]
+    # THE APPROVAL GATE, and the only one: GitHub prompts once per gated job,
+    # so a second `environment:` would ask twice for one decision. `needs:`
+    # makes this unreachable until every gate above passes.
+    environment: release-approval
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Push the tag
+        run: |
+          VER="${{ inputs.version }}"
+          # Re-checked under the approval: main can move while a run waits for a
+          # reviewer, and the gates measured the commit that was current then.
+          GOT="$(python3 -c "import tomllib;print(tomllib.load(open('extension.toml','rb'))['version'])")"
+          if [ "$GOT" != "$VER" ]; then
+            echo "::error::extension.toml now declares $GOT. main moved while this run" \
+                 "waited for approval, so the gate result no longer describes it. Re-run."
+            exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/v${VER}" >/dev/null; then
+            echo "::error::Tag v${VER} appeared while this run waited. Stopping."
+            exit 1
+          fi
+          git tag "v${VER}" "$GITHUB_SHA"
+          git push origin "refs/tags/v${VER}"
+          echo "tagged v${VER} at $GITHUB_SHA"
+
+  publish:
+    name: Publish the release notes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [tag]
+    # No `environment:` here: the decision was spent on the tag, and
+    # `needs: [tag]` already makes this unreachable without it.
+    permissions:
+      contents: write
+    steps:
+      - name: Un-draft the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: v${{ inputs.version }}
+        run: |
+          id="$(gh api "repos/$REPO/releases" --paginate \
+            --jq "[.[] | select(.tag_name == \"$TAG\" and .draft)] | first | .id // empty")"
+          if [ -z "$id" ]; then
+            echo "No draft release for $TAG; nothing to publish."
+            exit 0
+          fi
+          # `tag_name` goes with every PATCH of a release: omit it on a draft and
+          # GitHub replaces the tag with a generated `untagged-*` placeholder.
+          # `-F` for draft, so it is sent as a boolean - the string "false" is
+          # truthy and publishes anyway.
+          gh api "repos/$REPO/releases/$id" -X PATCH \
+            -f tag_name="$TAG" -F draft=false --jq '"published \(.tag_name)"'
+          gh api "repos/$REPO/releases/$id" --jq '"draft=\(.draft) tag=\(.tag_name)"'
+
+      - name: Say what is left to do by hand
+        run: |
+          echo "::notice::v${{ inputs.version }} is tagged and the release is published."
+          echo "::notice::Zed serves extensions from zed-industries/extensions. Open the"
+          echo "::notice::version bump there by hand; nothing in this repository can do it."
