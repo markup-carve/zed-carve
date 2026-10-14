@@ -97,19 +97,14 @@
   (list_marker_description)
   (list_marker_decimal_period)
   (list_marker_decimal_paren)
-  (list_marker_decimal_parens)
   (list_marker_lower_alpha_period)
   (list_marker_lower_alpha_paren)
-  (list_marker_lower_alpha_parens)
   (list_marker_upper_alpha_period)
   (list_marker_upper_alpha_paren)
-  (list_marker_upper_alpha_parens)
   (list_marker_lower_roman_period)
   (list_marker_lower_roman_paren)
-  (list_marker_lower_roman_parens)
   (list_marker_upper_roman_period)
   (list_marker_upper_roman_paren)
-  (list_marker_upper_roman_parens)
 ] @punctuation.special
 
 ; The `+` list and block-quote continuation marker (PART 9 SS17). It attaches
@@ -326,11 +321,6 @@
   (footnote_marker_begin)
   (footnote_marker_end)
 ] @punctuation.bracket
-
-; Comment-style task markers.
-(todo) @keyword
-(note) @comment
-(fixme) @keyword
 
 ; Fenced multi-line comment %%%...%%%.
 (fenced_comment_block) @comment

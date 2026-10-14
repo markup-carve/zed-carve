@@ -1,7 +1,7 @@
 name = "Carve"
 grammar = "carve"
 path_suffixes = ["crv"]
-block_comment = ["%% ", ""]
+line_comments = ["%% "]
 autoclose_before = ";:.,=}])>"
 word_characters = ["-", "_"]
 
