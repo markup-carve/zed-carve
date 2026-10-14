@@ -233,7 +233,6 @@
 ; Comments.
 [
   (comment_line)
-  (comment)
   (braced_comment)
   (trailing_comment)
 ] @comment

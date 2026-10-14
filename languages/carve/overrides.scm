@@ -9,7 +9,6 @@
 ] @string
 
 [
-  (comment)
   (comment_line)
   (trailing_comment)
   (braced_comment)
