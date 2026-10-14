@@ -8,6 +8,42 @@ Releases before 0.1.4 are described on the
 
 ## [Unreleased]
 
+### Fixed
+
+- Toggling a comment uses `%% ` as a line comment. The old block-comment entry
+  had an empty end, so Zed never detected an existing comment and added the
+  prefix only on the first row.
+- `TODO`, `NOTE` and `FIXME` are no longer highlighted in prose, where the
+  engine renders them as plain words. Inside `%%`, `%%%` and `{% %}` comments
+  they are marked when the Comments Highlighter extension is installed.
+- `---toml` and `---json` front matter is highlighted in its named language
+  instead of as YAML. Plain `---` stays YAML.
+- The outline lists headings inside `:::` containers, quotes and list items,
+  which open no section.
+
+These come with the grammar pin moving from tree-sitter-carve `c22272b` to
+`31cabdd`:
+
+- Block structure around quoted lists, comments, fences, tables, line blocks,
+  continuation markers and lazy lines follows the engine
+  (markup-carve/tree-sitter-carve#539, markup-carve/tree-sitter-carve#542,
+  markup-carve/tree-sitter-carve#546, markup-carve/tree-sitter-carve#551,
+  markup-carve/tree-sitter-carve#555).
+- Long paragraphs and lines parse in near-linear time, and a stale delimiter
+  note no longer hangs the parser (markup-carve/tree-sitter-carve#545,
+  markup-carve/tree-sitter-carve#547).
+- Very wide colon, code and comment fences are read at full width
+  (markup-carve/tree-sitter-carve#547, markup-carve/tree-sitter-carve#548,
+  markup-carve/tree-sitter-carve#549).
+- Citation, comment, column and quote-cap readings follow the engine, and a
+  braced span stays open across a bracket that holds its closer
+  (markup-carve/tree-sitter-carve#544, markup-carve/tree-sitter-carve#553).
+
+### Changed
+
+- The highlights query drops the five `list_marker_*_parens` patterns, which
+  name markers the grammar never produces.
+
 ## [0.1.5] - 2026-10-14
 
 ### Fixed

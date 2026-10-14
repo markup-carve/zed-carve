@@ -1,3 +1,20 @@
+; TODO, NOTE and FIXME are marked inside comments only, by the `comment`
+; language from the Comments Highlighter extension. Without it these inject
+; nothing. In prose the engine renders them as plain words.
+([
+  (comment_line)
+  (trailing_comment)
+] @injection.content
+  (#set! injection.language "comment"))
+
+([
+  (fenced_comment_block
+    (content) @injection.content)
+  (braced_comment
+    (content) @injection.content)
+]
+  (#set! injection.language "comment"))
+
 ; Inject the language named in a fenced code block's info string.
 (code_block
   (language) @injection.language
@@ -15,12 +32,13 @@
   (raw_inline_attribute
     (language) @injection.language))
 
-; Frontmatter blocks: default to YAML so bare `---` matter is highlighted.
-; Tree-sitter's grammar emits an optional (language) child for `---toml` etc.,
-; but Zed's injection layer only honors the first matching pattern reliably,
-; so we always set yaml here. Authors needing TOML/JSON frontmatter can override
-; this pattern in a downstream extension.
+; Frontmatter: `---toml` and `---json` name their language; plain `---` is YAML.
 (frontmatter
+  (language) @injection.language
+  (frontmatter_content) @injection.content)
+
+(frontmatter
+  !language
   (frontmatter_content) @injection.content
   (#set! injection.language "yaml"))
 

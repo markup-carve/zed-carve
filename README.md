@@ -20,11 +20,18 @@ grammar.
   via [carve-lsp](https://github.com/markup-carve/carve-lsp), installed
   automatically from npm through Zed's managed Node runtime.
 - Code-block language injections for fenced code blocks.
-- YAML highlighting inside frontmatter blocks.
+- YAML highlighting inside plain `---` frontmatter, and the named language
+  inside `---toml` or `---json` frontmatter.
+- `TODO`, `NOTE` and `FIXME` marked inside `%%`, `%%%` and `{% %}` comments,
+  when the Comments Highlighter extension (`comment` in the Zed extension
+  registry) is installed. It supplies the `comment` language this extension
+  injects; without it the comments keep their plain comment color.
 - LaTeX highlighting inside math spans/blocks.
 - Bracket matching and autoclose pairs for `[]`, `()`, `{}`, `/`, `_`, `*`, and
   backticks.
-- Outline view based on document headings and div/admonition blocks.
+- Outline view based on document headings, including headings inside
+  containers, quotes and list items, and div/admonition blocks.
+- `%%` line comments for comment toggling.
 - Snippets for common constructs: `adm` (admonition), `div`, `code` (fenced
   block), `table`, `fm` (frontmatter), `fn` (footnote), `task` (task item,
   any spec state).
