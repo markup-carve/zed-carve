@@ -280,14 +280,14 @@
 
 ((_
   (block_attribute args: (args (boolean_attribute (key) @attribute)))
-  . (block_attribute)*
-  . (code_block language: (language) @_language))
+  . [(block_attribute) (block_quote_marker)]*
+  . (table language: (language) @_language))
   (#eq? @attribute "table")
   (#any-of? @_language "csv" "tsv"))
 
 ((_
   (block_attribute args: (args (boolean_attribute (key) @attribute)))
-  . (block_attribute)*
+  . [(block_attribute) (block_quote_marker)]*
   . [(list) (definition_list)])
   (#eq? @attribute "loose"))
 
