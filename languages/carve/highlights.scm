@@ -279,14 +279,14 @@
   (#any-of? @attribute "abbr" "time"))
 
 ((_
-  (block_attribute args: (args (boolean_attribute) @attribute))
+  (block_attribute args: (args (boolean_attribute (key) @attribute)))
   . (block_attribute)*
   . (code_block language: (language) @_language))
   (#eq? @attribute "table")
   (#any-of? @_language "csv" "tsv"))
 
 ((_
-  (block_attribute args: (args (boolean_attribute) @attribute))
+  (block_attribute args: (args (boolean_attribute (key) @attribute)))
   . (block_attribute)*
   . [(list) (definition_list)])
   (#eq? @attribute "loose"))
