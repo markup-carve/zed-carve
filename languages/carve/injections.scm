@@ -20,6 +20,10 @@
   (language) @injection.language
   (code) @injection.content)
 
+(table
+  (language) @injection.language
+  (code) @injection.content)
+
 ; Raw blocks carry their target format as the language.
 (raw_block
   (raw_block_info

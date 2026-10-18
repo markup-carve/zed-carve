@@ -73,6 +73,23 @@ const UNTERMINATED_QUOTE_DIRECTIVE = '{{ ch.crv @label:"two words }}\n';
 const PAIR_IN_QUOTED_VALUE_DIRECTIVE = '{{ ch.crv @label:"a }} b" }} tail\n';
 
 const CASES = [
+    { name: 'kbd on a span', source: '[Tab]{kbd}\n', at: [0, 6], expect: 'attribute' },
+    { name: 'abbr on a span', source: '[ABC]{abbr=ABC}\n', at: [0, 6], expect: 'attribute' },
+    { name: 'time on a span', source: '[10:00]{time=10:00}\n', at: [0, 8], expect: 'attribute' },
+    { name: 'kbd above prose', source: '{kbd}\ntext\n', at: [0, 1], expect: 'property' },
+    { name: 'table above CSV', source: '{table}\n```csv\na,b\n```\n', at: [0, 1], expect: 'attribute' },
+    { name: 'table inside a quote', source: '> {table}\n> ```csv\n> a,b\n> ```\n', at: [0, 3], expect: 'attribute' },
+    { name: 'table through a quoted attribute', source: '> {table}\n> {#id}\n> ```csv\n> a,b\n> ```\n', at: [0, 3], expect: 'attribute' },
+    { name: 'table above prose', source: '{table}\ntext\n', at: [0, 1], expect: 'property' },
+    { name: 'loose above a list', source: '{loose}\n- item\n', at: [0, 1], expect: 'attribute' },
+    { name: 'loose inside a quote', source: '> {loose}\n> - a\n', at: [0, 3], expect: 'attribute' },
+    { name: 'loose above prose', source: '{loose}\ntext\n', at: [0, 1], expect: 'property' },
+    { name: 'table through another attribute', source: '{table}\n{#t}\n```csv\na,b\n```\n', at: [0, 1], expect: 'attribute' },
+    { name: 'table after a blank line', source: '{table}\n\n```csv\na,b\n```\n', at: [0, 1], expect: 'attribute' },
+    { name: 'table above another language', source: '{table}\n```python\nx\n```\n', at: [0, 1], expect: 'property' },
+    { name: 'loose above a definition list', source: '{loose}\n:: t\n: d\n', at: [0, 1], expect: 'attribute' },
+    { name: 'loose through another attribute', source: '{loose}\n{.x}\n- item\n', at: [0, 1], expect: 'attribute' },
+    { name: 'abbr above prose', source: '{abbr=x}\ntext\n', at: [0, 1], expect: 'property' },
     {
         name: 'a bare figure opener is a composite figure',
         source: '::: figure\n![one](a.png)\n^ (a) One\n:::\n^ Figure #: Group caption\n',

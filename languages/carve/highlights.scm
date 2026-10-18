@@ -267,6 +267,30 @@
 ; Boolean attribute shorthand: `{reversed}`, `{flag}`.
 (boolean_attribute (key) @property)
 
+; Reserved words take their special meaning only in these positions.
+((span
+  attribute: (inline_attribute
+    (args (boolean_attribute (key) @attribute))))
+  (#eq? @attribute "kbd"))
+
+((span
+  attribute: (inline_attribute
+    (args (key_value key: (key) @attribute))))
+  (#any-of? @attribute "abbr" "time"))
+
+((_
+  (block_attribute args: (args (boolean_attribute (key) @attribute)))
+  . [(block_attribute) (block_quote_marker)]*
+  . (table language: (language) @_language))
+  (#eq? @attribute "table")
+  (#any-of? @_language "csv" "tsv"))
+
+((_
+  (block_attribute args: (args (boolean_attribute (key) @attribute)))
+  . [(block_attribute) (block_quote_marker)]*
+  . [(list) (definition_list)])
+  (#eq? @attribute "loose"))
+
 ; The language attribute: `{:fr}`, `{:zh-Hant}` (markup-carve/carve#1114).
 (language_attribute) @attribute
 
