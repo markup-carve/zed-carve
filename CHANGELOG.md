@@ -8,6 +8,14 @@ Releases before 0.1.4 are described on the
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-10-18
+
+### Improved
+
+- Color reserved `kbd`, `abbr` and `time` keys on spans, `table` above CSV or TSV fences, and `loose` above lists. Quoted and stacked block attributes keep the same colors (#80).
+- Inject CSV and TSV into delimited table code while keeping table captions in their normal style (#80).
+- Pin tree-sitter-carve at `3c1d6f0`, which includes the Carve 0.1.10 corpus, CSV/TSV table nodes, and the parser fixes from #559 and #563 (#79, #81, #80).
+
 ## [0.1.5] - 2026-10-14
 
 ### Fixed
