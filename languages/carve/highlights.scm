@@ -107,10 +107,8 @@
   (list_marker_upper_roman_paren)
 ] @punctuation.special
 
-; The `+` list and block-quote continuation marker (PART 9 SS17). It attaches
-; the next flush-left block to the item above it, so it is a list marker even
-; though it opens no item of its own.
-(list_continuation_marker) @punctuation.special
+; The `+` continuation operator attaches the next block to its container.
+(list_continuation_marker) @operator
 
 (list_marker_task (unchecked)) @punctuation.special
 (list_marker_task (checked)) @punctuation.special

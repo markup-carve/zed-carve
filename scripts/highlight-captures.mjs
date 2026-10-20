@@ -252,7 +252,13 @@ const CASES = [
         name: 'the list continuation marker is painted',
         source: '- item\n+\nan attached block\n',
         at: [1, 0],
-        expect: 'punctuation.special',
+        expect: 'operator',
+    },
+    {
+        name: 'the task item continuation marker is painted',
+        source: '- [ ] +\n```sh\nnpm test\n```\n',
+        at: [0, 6],
+        expect: 'operator',
     },
 
     /*
