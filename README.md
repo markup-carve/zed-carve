@@ -26,6 +26,10 @@ grammar.
   when the Comments Highlighter extension (`comment` in the Zed extension
   registry) is installed. It supplies the `comment` language this extension
   injects; without it the comments keep their plain comment color.
+- `csv` fence bodies and `{table}` CSV bodies highlighted when the CSV
+  extension (`csv` in the Zed extension registry) is installed. It supplies the
+  `csv` language the fence injects; without it the body stays plain. No
+  extension in the registry provides `tsv`, so `tsv` bodies stay plain.
 - LaTeX highlighting inside math spans/blocks.
 - Bracket matching and autoclose pairs for `[]`, `()`, `{}`, `/`, `_`, `*`, and
   backticks.
