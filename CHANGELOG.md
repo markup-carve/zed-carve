@@ -12,11 +12,14 @@ Releases before 0.1.4 are described on the
 
 ### Fixed
 
-- Pin tree-sitter-carve at `6564ab4`, which reads the `+` continuation
+- Pin tree-sitter-carve 0.1.11 (`4f400d1`), which reads the `+` continuation
   marker by its owner's column per markup-carve/carve#3421: an indented or
   refused lone `+` is text, glued quote prefixes `>+`, `>>+`, `> >+` and
   `>> +` are text, and a first-block `+` in a footnote, description or
-  stacked opener attaches its block (#88, #89, #90).
+  stacked opener attaches its block (#88, #89, #90, #92, #93).
+- With the same pin, a quote-prefixed `+` reads like its unquoted twin, also
+  at a quoted item's content column, and a paragraph continues lazily onto a
+  line with fewer quote markers (#93).
 - With the same pin, quote markers in nested containers match at their own
   column, list and fence ownership is read at the reached column, and a
   valueless include option parses as an option (#85, #86, #88).
@@ -25,6 +28,8 @@ Releases before 0.1.4 are described on the
 
 - The `+` continuation marker is colored as an operator, separate from list
   punctuation (#87).
+- Color `table` as reserved above a CSV or TSV code include
+  (`{{ data.csv @code:csv }}`), which renders as a table like a CSV fence (#93).
 
 ## [0.1.6] - 2026-10-18
 
