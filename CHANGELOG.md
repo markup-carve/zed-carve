@@ -8,6 +8,18 @@ Releases before 0.1.4 are described on the
 
 ## [Unreleased]
 
+## [0.1.8] - 2026-10-24
+
+Quoted lists and continuation markers now highlight according to the latest Carve grammar, including lazy lines in nested quotes.
+
+### Fixes
+
+- Quoted list markers and indented quote prefixes keep their correct scope when a lazy line changes which container owns the following block (#95).
+- A refused or ownerless `+` stays paragraph text, while a valid `+` attaches the following block to its list item (#95).
+
+**Full Changelog**: https://github.com/markup-carve/zed-carve/compare/v0.1.7...v0.1.8
+
+
 ## [0.1.7] - 2026-10-23
 
 ### Fixed
