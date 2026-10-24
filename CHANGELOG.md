@@ -16,6 +16,7 @@ Quoted lists and continuation markers now highlight according to the latest Carv
 
 - Quoted list markers and indented quote prefixes keep their correct scope when a lazy line changes which container owns the following block (#95).
 - A refused or ownerless `+` stays paragraph text, while a valid `+` attaches the following block to its list item (#95).
+- Padded table spans and wrapped attributes in definitions and quotes follow the published 0.1.12 grammar (#97).
 
 **Full Changelog**: https://github.com/markup-carve/zed-carve/compare/v0.1.7...v0.1.8
 
