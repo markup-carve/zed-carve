@@ -1,0 +1,9 @@
+# Native table headers
+
+|= Name |= Role |= Active |
+| Alice | Developer | yes |
+|= Totals | 2 people | 1 |
+^ Header cells use the native marker.
+
+|= Item |= Note |
+|{.done} Ship | today |

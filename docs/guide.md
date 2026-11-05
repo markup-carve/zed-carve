@@ -14,14 +14,15 @@ grammar.
 
 ## Features
 
-- Syntax highlighting for Carve-style markup files.
+- Syntax highlighting for Carve-style markup files, including native `|=`
+  table header cells and cell attribute blocks.
 - Language server integration (diagnostics, completions, hover,
   go-to-definition, references, rename, code actions, folding, formatting)
   via [carve-lsp](https://github.com/markup-carve/carve-lsp), installed
   automatically from npm through Zed's managed Node runtime.
 - Code-block language injections for fenced code blocks.
-- YAML highlighting inside plain `---` frontmatter, and the named language
-  inside `---toml` or `---json` frontmatter.
+- YAML highlighting inside `---yaml` or plain `---` frontmatter, and the named
+  language inside `---toml` or `---json` frontmatter.
 - `TODO`, `NOTE` and `FIXME` marked inside `%%`, `%%%` and `{% %}` comments,
   when the Comments Highlighter extension (`comment` in the Zed extension
   registry) is installed. It supplies the `comment` language this extension

@@ -17,15 +17,14 @@
   "Table": {
     "prefix": "table",
     "body": [
-      "| ${1:Header} | ${2:Header} |",
-      "|---|---|",
+      "|= ${1:Header} |= ${2:Header} |",
       "| $0 |  |"
     ],
     "description": "Two-column table skeleton"
   },
   "Frontmatter": {
     "prefix": "fm",
-    "body": ["---", "title: $1", "---", "", "$0"],
+    "body": ["---yaml", "title: $1", "---", "", "$0"],
     "description": "YAML frontmatter block"
   },
   "Footnote": {

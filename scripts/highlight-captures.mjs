@@ -95,6 +95,24 @@ const CASES = [
     { name: 'loose above a definition list', source: '{loose}\n:: t\n: d\n', at: [0, 1], expect: 'attribute' },
     { name: 'loose through another attribute', source: '{loose}\n{.x}\n- item\n', at: [0, 1], expect: 'attribute' },
     { name: 'abbr above prose', source: '{abbr=x}\ntext\n', at: [0, 1], expect: 'property' },
+    /*
+     * Native `|=` header cells (CARVE-P9-006) take the header color that a GFM
+     * header row takes, and a cell's attribute run is an attribute.
+     */
+    { name: 'a native header cell', source: '|= Name |= Qty |\n| a | 1 |\n', at: [0, 1], expect: 'title' },
+    { name: 'the second native header cell', source: '|= Name |= Qty |\n| a | 1 |\n', at: [0, 9], expect: 'title' },
+    { name: 'a data cell below native headers', source: '|= Name |= Qty |\n| a | 1 |\n', at: [1, 1], expect: null },
+    { name: 'a native row header in a body row', source: '| a |= b |\n', at: [0, 5], expect: 'title' },
+    { name: 'a deprecated glued alignment header', source: '|=> Qty |\n| 1 |\n', at: [0, 1], expect: 'title' },
+    { name: 'an empty native header cell', source: '|= |= a |\n| 1 | 2 |\n', at: [0, 1], expect: 'title' },
+    { name: 'control: =x with no padding space is a data cell', source: '|=x |\n| a |\n', at: [0, 1], expect: null },
+    { name: 'inline markup inside a native header keeps its color', source: '|= =x= |\n| a |\n', at: [0, 3], expect: 'punctuation.delimiter' },
+    { name: 'a header whose attribute value holds a brace', source: '|=>{title="a}b"} H |\n| x |\n', at: [0, 1], expect: 'attribute' },
+    { name: 'a header with a braced attribute value is a header', source: '|=>{title="a}b"} H |\n| x |\n', at: [0, 1], expect: 'title', under: true },
+    { name: 'a header with an attribute block is a header', source: '|=>{.x} a |\n| b |\n', at: [0, 1], expect: 'title', under: true },
+    { name: 'control: a data cell with an attribute block is not a header', source: '|{.x} a |\n', at: [0, 1], expect: null, under: true },
+    { name: 'a data cell attribute block', source: '|{.x} a |\n', at: [0, 1], expect: 'attribute' },
+    { name: 'a header cell attribute block', source: '|=>{.x} a |\n| b |\n', at: [0, 1], expect: 'attribute' },
     {
         name: 'a bare figure opener is a composite figure',
         source: '::: figure\n![one](a.png)\n^ (a) One\n:::\n^ Figure #: Group caption\n',
@@ -545,10 +563,15 @@ try {
             return;
         }
         const [row, column] = testCase.at;
-        const winner = captures
+        const colors = captures
             .filter((capture) => capture.row === row && capture.column === column)
-            .filter((capture) => !capture.name.startsWith('_') && !NOT_A_COLOR.has(capture.name))
-            .at(-1);
+            .filter((capture) => !capture.name.startsWith('_') && !NOT_A_COLOR.has(capture.name));
+        /*
+         * `under` asks for the capture painted BELOW the winner: a header cell
+         * whose attribute run wins its first columns still carries the header
+         * color over the rest of the cell, and the resolver sees only starts.
+         */
+        const winner = testCase.under ? colors.at(-2) : colors.at(-1);
         const got = winner ? winner.name : null;
         if (got !== testCase.expect) {
             fails.push(
