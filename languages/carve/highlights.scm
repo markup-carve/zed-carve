@@ -83,10 +83,15 @@
 (table_header) @title
 
 ; A native `|=` header cell (CARVE-P9-006). The grammar gives it no node of its
-; own, so the cell text decides: `=`, an optional alignment run, an optional
-; attribute block, then the padding space. `|=x |` is a data cell.
+; own: without an attribute block the cell text decides (`=`, an optional
+; alignment run, the padding space; `|=x |` is a data cell), with one the
+; marker run the grammar already read does.
 ((table_cell) @title
-  (#match? @title "^=([<>~][\\^~v]?|\\?[\\^~v])?(\\{[^}]*\\})? "))
+  (#match? @title "^=([<>~][\\^~v]?|\\?[\\^~v])? "))
+((table_cell
+  .
+  (table_cell_attributes) @_run) @title
+  (#match? @_run "^="))
 
 ; The cell's marker run and attribute block, `|={>} ` or `|{.x} `.
 (table_cell_attributes) @attribute

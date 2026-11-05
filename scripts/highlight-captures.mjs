@@ -107,6 +107,10 @@ const CASES = [
     { name: 'an empty native header cell', source: '|= |= a |\n| 1 | 2 |\n', at: [0, 1], expect: 'title' },
     { name: 'control: =x with no padding space is a data cell', source: '|=x |\n| a |\n', at: [0, 1], expect: null },
     { name: 'inline markup inside a native header keeps its color', source: '|= =x= |\n| a |\n', at: [0, 3], expect: 'punctuation.delimiter' },
+    { name: 'a header whose attribute value holds a brace', source: '|=>{title="a}b"} H |\n| x |\n', at: [0, 1], expect: 'attribute' },
+    { name: 'a header with a braced attribute value is a header', source: '|=>{title="a}b"} H |\n| x |\n', at: [0, 1], expect: 'title', under: true },
+    { name: 'a header with an attribute block is a header', source: '|=>{.x} a |\n| b |\n', at: [0, 1], expect: 'title', under: true },
+    { name: 'control: a data cell with an attribute block is not a header', source: '|{.x} a |\n', at: [0, 1], expect: null, under: true },
     { name: 'a data cell attribute block', source: '|{.x} a |\n', at: [0, 1], expect: 'attribute' },
     { name: 'a header cell attribute block', source: '|=>{.x} a |\n| b |\n', at: [0, 1], expect: 'attribute' },
     {
@@ -559,10 +563,15 @@ try {
             return;
         }
         const [row, column] = testCase.at;
-        const winner = captures
+        const colors = captures
             .filter((capture) => capture.row === row && capture.column === column)
-            .filter((capture) => !capture.name.startsWith('_') && !NOT_A_COLOR.has(capture.name))
-            .at(-1);
+            .filter((capture) => !capture.name.startsWith('_') && !NOT_A_COLOR.has(capture.name));
+        /*
+         * `under` asks for the capture painted BELOW the winner: a header cell
+         * whose attribute run wins its first columns still carries the header
+         * color over the rest of the cell, and the resolver sees only starts.
+         */
+        const winner = testCase.under ? colors.at(-2) : colors.at(-1);
         const got = winner ? winner.name : null;
         if (got !== testCase.expect) {
             fails.push(
