@@ -36,7 +36,7 @@
   (raw_inline_attribute
     (language) @injection.language))
 
-; Frontmatter: `---toml` and `---json` name their language; plain `---` is YAML.
+; Frontmatter: `---yaml`, `---toml` and `---json` name their language; plain `---` is YAML.
 (frontmatter
   (language) @injection.language
   (frontmatter_content) @injection.content)

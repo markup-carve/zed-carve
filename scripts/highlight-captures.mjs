@@ -95,6 +95,20 @@ const CASES = [
     { name: 'loose above a definition list', source: '{loose}\n:: t\n: d\n', at: [0, 1], expect: 'attribute' },
     { name: 'loose through another attribute', source: '{loose}\n{.x}\n- item\n', at: [0, 1], expect: 'attribute' },
     { name: 'abbr above prose', source: '{abbr=x}\ntext\n', at: [0, 1], expect: 'property' },
+    /*
+     * Native `|=` header cells (CARVE-P9-006) take the header color that a GFM
+     * header row takes, and a cell's attribute run is an attribute.
+     */
+    { name: 'a native header cell', source: '|= Name |= Qty |\n| a | 1 |\n', at: [0, 1], expect: 'title' },
+    { name: 'the second native header cell', source: '|= Name |= Qty |\n| a | 1 |\n', at: [0, 9], expect: 'title' },
+    { name: 'a data cell below native headers', source: '|= Name |= Qty |\n| a | 1 |\n', at: [1, 1], expect: null },
+    { name: 'a native row header in a body row', source: '| a |= b |\n', at: [0, 5], expect: 'title' },
+    { name: 'a deprecated glued alignment header', source: '|=> Qty |\n| 1 |\n', at: [0, 1], expect: 'title' },
+    { name: 'an empty native header cell', source: '|= |= a |\n| 1 | 2 |\n', at: [0, 1], expect: 'title' },
+    { name: 'control: =x with no padding space is a data cell', source: '|=x |\n| a |\n', at: [0, 1], expect: null },
+    { name: 'inline markup inside a native header keeps its color', source: '|= =x= |\n| a |\n', at: [0, 3], expect: 'punctuation.delimiter' },
+    { name: 'a data cell attribute block', source: '|{.x} a |\n', at: [0, 1], expect: 'attribute' },
+    { name: 'a header cell attribute block', source: '|=>{.x} a |\n| b |\n', at: [0, 1], expect: 'attribute' },
     {
         name: 'a bare figure opener is a composite figure',
         source: '::: figure\n![one](a.png)\n^ (a) One\n:::\n^ Figure #: Group caption\n',
