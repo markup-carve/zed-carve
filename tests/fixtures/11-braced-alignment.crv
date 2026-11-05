@@ -1,0 +1,11 @@
+# Braced cell alignment
+
+|={<} Item |={>} Price |={~^} Note |
+| Tea | 3 | hot |
+|{<} Cake |{>} 12 |{?v .x} cold |
+
+Breaks spelled with spaces:
+
+- - -
+
+* * *
