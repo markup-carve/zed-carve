@@ -111,6 +111,16 @@ const CASES = [
     { name: 'a header with a braced attribute value is a header', source: '|=>{title="a}b"} H |\n| x |\n', at: [0, 1], expect: 'title', under: true },
     { name: 'a header with an attribute block is a header', source: '|=>{.x} a |\n| b |\n', at: [0, 1], expect: 'title', under: true },
     { name: 'control: a data cell with an attribute block is not a header', source: '|{.x} a |\n', at: [0, 1], expect: null, under: true },
+    /*
+     * Braced alignment (markup-carve/carve#5091 D3): the symbols lead the
+     * cell's attribute block, which the grammar reads as the marker run.
+     */
+    { name: 'a braced alignment header run', source: '|={>} Price |\n| 3 |\n', at: [0, 1], expect: 'attribute' },
+    { name: 'a braced alignment header is a header', source: '|={>} Price |\n| 3 |\n', at: [0, 1], expect: 'title', under: true },
+    { name: 'a braced alignment data cell run', source: '|={<} a |\n|{>} 3 |\n', at: [1, 1], expect: 'attribute' },
+    { name: 'control: an invalid alignment block is cell text', source: '|{^} a |\n', at: [0, 1], expect: null },
+    { name: 'an unclosed frontmatter opener (markup-carve/carve#5016)', source: '---yaml\na: 1\n\n# not a heading\n', at: [0, 0], expect: 'text.literal', under: true },
+    { name: 'a spaced thematic break', source: '- - -\n', at: [0, 0], expect: 'punctuation.special', end: [1, 0] },
     { name: 'a data cell attribute block', source: '|{.x} a |\n', at: [0, 1], expect: 'attribute' },
     { name: 'a header cell attribute block', source: '|=>{.x} a |\n| b |\n', at: [0, 1], expect: 'attribute' },
     {
