@@ -46,13 +46,42 @@ grammar.
 
 ## Export and import
 
-### Export to Markdown or HTML
+### Export to Markdown, HTML or PDF
 
-carve-lsp offers two code actions on a `.crv` file, **Export as Markdown** and
-**Export as HTML**. Open the code actions menu (`ctrl-.` on Linux and Windows,
-`cmd-.` on macOS) and pick one. Zed applies the edit as an unsaved buffer
-(`notes.md` or `notes.html` next to `notes.crv`), so save that buffer to write
-the file. The actions need a carve-lsp release newer than 0.1.7.
+carve-lsp offers three code actions on a `.crv` file, **Export as Markdown**,
+**Export as HTML** and **Export as PDF**. Open the code actions menu (`ctrl-.`
+on Linux and Windows, `cmd-.` on macOS) and pick one. Zed applies a Markdown or
+HTML export as an unsaved buffer (`notes.md` or `notes.html` next to
+`notes.crv`), so save that buffer to write the file. Those two actions need a
+carve-lsp release newer than 0.1.7; the PDF action needs carve-lsp after
+0.1.15.
+
+**Export as PDF** is run by the server, which writes `notes.pdf` itself. It
+uses `crv2pdf` from [carve-pdf](https://github.com/markup-carve/carve-pdf) when
+that is on `PATH` (clone it and run `make install`); that gives the better page
+layout. Otherwise it prints the rendered HTML with an installed Chrome,
+Chromium or Edge in headless mode. Neither tool comes with carve-lsp. To point
+at a specific executable, pass the `carve.pdf` keys as initialization options
+in your Zed `settings.json`:
+
+```json
+{
+  "lsp": {
+    "carve-lsp": {
+      "initialization_options": {
+        "carve": {
+          "pdf": {
+            "crv2pdfPath": "/path/to/crv2pdf",
+            "browserPath": "/path/to/chromium"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Both keys are optional. A failed export shows the tool's error output.
 
 ### Import from Markdown or HTML
 
