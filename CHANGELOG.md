@@ -8,6 +8,22 @@ Releases before 0.1.4 are described on the
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-11-11
+
+Zed follows the Carve 0.1.14 grammar, colors native table headers and writes canonical snippets.
+
+### Fixes
+
+- Native `|=` header cells take the header color, including cells with an attribute block, and a cell's marker run and attribute block take the attribute color (#101).
+- The table snippet writes `|=` header cells and the frontmatter snippet a `---yaml` opener (#101).
+
+### Improvements
+
+- The grammar pin follows the tree-sitter-carve release for Carve 0.1.14: braced cell alignment (`|={>}`), spaced thematic breaks, and frontmatter without a closer (#102).
+- The guide documents the carve-lsp Export as PDF action and its `carve.pdf.crv2pdfPath` and `carve.pdf.browserPath` options (#105).
+
+**Full Changelog**: https://github.com/markup-carve/zed-carve/compare/v0.1.8...v0.1.9
+
 ## [0.1.8] - 2026-10-24
 
 Quoted lists and continuation markers now highlight according to the latest Carve grammar, including lazy lines in nested quotes.

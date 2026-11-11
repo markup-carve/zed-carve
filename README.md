@@ -1,6 +1,6 @@
 # zed-carve
 
-Carve support for Zed with Tree-sitter highlighting and managed `carve-lsp` integration. Extension version 0.1.8 pins its grammar revision in `extension.toml`. See the [Carve documentation](https://markup-carve.github.io/carve/) for the markup language.
+Carve support for Zed with Tree-sitter highlighting and managed `carve-lsp` integration. Extension version 0.1.9 pins its grammar revision in `extension.toml`. See the [Carve documentation](https://markup-carve.github.io/carve/) for the markup language.
 
 ## Features
 
