@@ -8,7 +8,7 @@ Releases before 0.1.4 are described on the
 
 ## [Unreleased]
 
-## [0.1.9] - 2026-11-11
+## [0.1.9] - 2026-11-12
 
 Zed follows the Carve 0.1.14 grammar, colors native table headers and writes canonical snippets.
 
@@ -19,7 +19,7 @@ Zed follows the Carve 0.1.14 grammar, colors native table headers and writes can
 
 ### Improvements
 
-- The grammar pin follows the tree-sitter-carve release for Carve 0.1.14: braced cell alignment (`|={>}`), spaced thematic breaks, and frontmatter without a closer (#102).
+- The grammar pin moves to tree-sitter-carve 0.1.14, the release for Carve 0.1.14: braced cell alignment (`|={>}`), spaced thematic breaks, frontmatter without a closer, and a linear-time parse of a line of unclosed braced openers (#102, #107, #108, #106).
 - The guide documents the carve-lsp Export as PDF action and its `carve.pdf.crv2pdfPath` and `carve.pdf.browserPath` options (#105).
 
 **Full Changelog**: https://github.com/markup-carve/zed-carve/compare/v0.1.8...v0.1.9
