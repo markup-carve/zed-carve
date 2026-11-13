@@ -82,10 +82,10 @@
 ; Tables.
 (table_header) @title
 
-; A native `|=` header cell (CARVE-P9-006). The grammar gives it no node of its
-; own: without an attribute block the cell text decides (`=`, an optional
+; A native `|=` header cell (CARVE-P9-006). The cell has no node of its own:
+; without an attribute block the cell text decides (`=`, an optional
 ; alignment run, the padding space; `|=x |` is a data cell), with one the
-; marker run the grammar already read does.
+; marker run the grammar already read does. The `=` itself is captured below.
 ((table_cell) @title
   (#match? @title "^=([<>~][\\^~v]?|\\?[\\^~v])? "))
 ((table_cell
@@ -99,6 +99,39 @@
 (table_header "|" @punctuation.special)
 (table_row "|" @punctuation.special)
 (table_separator) @punctuation.special
+
+; A `+` continuation row: its marker and its pipes. The cells are inline.
+(table_continuation_row
+  "+" @operator)
+
+(table_continuation_row
+  "|" @punctuation.special)
+
+; A one-cell row reads on into its continuation line: the row's own pipe and
+; the `+` behind it sit inside the cell.
+(table_cell
+  "|" @punctuation.special
+  .
+  "+" @operator)
+
+; The `=` of a native header cell.
+((table_cell
+  .
+  "=" @operator) @_cell
+  (#match? @_cell "^=([<>~][\\^~v]?|\\?[\\^~v])? "))
+
+; A cell holding only `^` or `<` is a row span or a column span.
+((table_cell
+  .
+  [
+    "^"
+    "<"
+  ] @operator
+  .) @_cell
+  (#match? @_cell "^[ \\t]*[<^][ \\t]*$"))
+
+(table_separator
+  (table_cell_alignment) @operator)
 
 (table_caption (marker) @punctuation.special)
 (table_caption) @emphasis
@@ -328,6 +361,8 @@
 (inline_link (inline_link_destination) @link_uri)
 (inline_link (link_text) @link_text)
 
+; A definition at a list item content column is one leaf.
+(link_reference_definition) @link_uri
 (link_reference_definition ":" @punctuation.special)
 (link_reference_definition ["[" "]"] @punctuation.bracket)
 (link_reference_definition (link_label) @link_text)
@@ -392,3 +427,39 @@
 ; Callout list (§10 / Tier-2 extension).
 (callout_list) @punctuation.special
 (callout_list_item) @punctuation.special
+
+; Markers inside constructs an earlier pattern paints as a whole. They sit
+; last so they win over those patterns. The opener of a cell marker run and
+; of an inline note stay under the whole-node capture.
+(table_cell_attributes
+  (table_cell_alignment) @operator)
+
+(table_cell_attributes
+  (args) @property)
+
+(div_title) @string
+
+(div_title
+  "\"" @punctuation.delimiter)
+
+(code_block_label
+  [
+    "["
+    "]"
+  ] @punctuation.bracket)
+
+(substitution
+  to: (content) @emphasis)
+
+(substitution
+  [
+    "{~"
+    "~>"
+    "~}"
+  ] @punctuation.delimiter)
+
+(inline_note
+  "]" @punctuation.bracket)
+
+(extension_inline
+  content: (content) @string)
