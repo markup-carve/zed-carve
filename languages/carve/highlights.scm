@@ -118,7 +118,7 @@
 ((table_cell
   .
   "=" @operator) @_cell
-  (#match? @_cell "^="))
+  (#match? @_cell "^=([<>~][\\^~v]?|\\?[\\^~v])? "))
 
 ; A cell holding only `^` or `<` is a row span or a column span.
 ((table_cell

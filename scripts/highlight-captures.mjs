@@ -102,7 +102,7 @@ const CASES = [
     { name: 'a native header cell', source: '|= Name |= Qty |\n| a | 1 |\n', at: [0, 1], expect: 'title', under: true },
     { name: 'the second native header cell', source: '|= Name |= Qty |\n| a | 1 |\n', at: [0, 9], expect: 'title', under: true },
     { name: 'a data cell below native headers', source: '|= Name |= Qty |\n| a | 1 |\n', at: [1, 1], expect: null },
-    { name: 'a native row header in a body row', source: '| a |= b |\n', at: [0, 5], expect: 'title' },
+    { name: 'a native row header in a body row', source: '| a |= b |\n', at: [0, 5], expect: 'title', under: true },
     { name: 'a deprecated glued alignment header', source: '|=> Qty |\n| 1 |\n', at: [0, 1], expect: 'title', under: true },
     { name: 'an empty native header cell', source: '|= |= a |\n| 1 | 2 |\n', at: [0, 1], expect: 'title', under: true },
     { name: 'control: =x with no padding space is a data cell', source: '|=x |\n| a |\n', at: [0, 1], expect: null },
