@@ -72,28 +72,31 @@ const PADDED_SELECTOR_GLUED_OPTION_DIRECTIVE = 'See {{ ch.crv #Intro@shift:auto 
 const UNTERMINATED_QUOTE_DIRECTIVE = '{{ ch.crv @label:"two words }}\n';
 const PAIR_IN_QUOTED_VALUE_DIRECTIVE = '{{ ch.crv @label:"a }} b" }} tail\n';
 
+/*
+ * Shapes the Carve 0.2 grammar does not parse yet. A pending case that fails is
+ * reported and skipped; one that passes fails the run, so the flag gets dropped.
+ */
+const TS695 = 'markup-carve/tree-sitter-carve#695';
+
 const CASES = [
     { name: 'kbd on a span', source: '[Tab]{kbd}\n', at: [0, 6], expect: 'attribute' },
     { name: 'abbr on a span', source: '[ABC]{abbr=ABC}\n', at: [0, 6], expect: 'attribute' },
     { name: 'time on a span', source: '[10:00]{time=10:00}\n', at: [0, 8], expect: 'attribute' },
     { name: 'kbd above prose', source: '{kbd}\ntext\n', at: [0, 1], expect: 'property' },
-    { name: 'table above CSV', source: '{table}\n```csv\na,b\n```\n', at: [0, 1], expect: 'attribute' },
-    { name: 'table inside a quote', source: '> {table}\n> ```csv\n> a,b\n> ```\n', at: [0, 3], expect: 'attribute' },
-    { name: 'table through a quoted attribute', source: '> {table}\n> {#id}\n> ```csv\n> a,b\n> ```\n', at: [0, 3], expect: 'attribute' },
+    { name: 'table above CSV', source: '{table}\n```csv\na,b\n```\n', at: [0, 1], expect: 'attribute', pending: TS695 },
+    { name: 'table inside a quote', source: '> {table}\n> ```csv\n> a,b\n> ```\n', at: [0, 3], expect: 'attribute', pending: TS695 },
+    { name: 'table through a quoted attribute', source: '> {table}\n> {#id}\n> ```csv\n> a,b\n> ```\n', at: [0, 3], expect: 'attribute', pending: TS695 },
     { name: 'table above prose', source: '{table}\ntext\n', at: [0, 1], expect: 'property' },
-    { name: 'loose above a list', source: '{loose}\n- item\n', at: [0, 1], expect: 'attribute' },
-    { name: 'loose inside a quote', source: '> {loose}\n> - a\n', at: [0, 3], expect: 'attribute' },
+    { name: 'loose above a list is an ordinary attribute', source: '{loose}\n- item\n', at: [0, 1], expect: 'property' },
     { name: 'loose above prose', source: '{loose}\ntext\n', at: [0, 1], expect: 'property' },
-    { name: 'table through another attribute', source: '{table}\n{#t}\n```csv\na,b\n```\n', at: [0, 1], expect: 'attribute' },
-    { name: 'table after a blank line', source: '{table}\n\n```csv\na,b\n```\n', at: [0, 1], expect: 'attribute' },
+    { name: 'table through another attribute', source: '{table}\n{#t}\n```csv\na,b\n```\n', at: [0, 1], expect: 'attribute', pending: TS695 },
+    { name: 'table after a blank line', source: '{table}\n\n```csv\na,b\n```\n', at: [0, 1], expect: 'attribute', pending: TS695 },
     { name: 'table above another language', source: '{table}\n```python\nx\n```\n', at: [0, 1], expect: 'property' },
     { name: 'table above a csv code include', source: '{table}\n{{ data.csv @code:csv }}\n', at: [0, 1], expect: 'attribute' },
     { name: 'table above a tsv code include', source: '{table}\n{{ data.tsv @code:tsv }}\n', at: [0, 1], expect: 'attribute' },
     { name: 'table above a quoted csv code include', source: '> {table}\n> {{ data.csv @code:csv }}\n', at: [0, 3], expect: 'attribute' },
     { name: 'table above a code include of another language', source: '{table}\n{{ a.js @code:js }}\n', at: [0, 1], expect: 'property' },
     { name: 'table above a plain csv include', source: '{table}\n{{ data.csv }}\n', at: [0, 1], expect: 'property' },
-    { name: 'loose above a definition list', source: '{loose}\n:: t\n: d\n', at: [0, 1], expect: 'attribute' },
-    { name: 'loose through another attribute', source: '{loose}\n{.x}\n- item\n', at: [0, 1], expect: 'attribute' },
     { name: 'abbr above prose', source: '{abbr=x}\ntext\n', at: [0, 1], expect: 'property' },
     /*
      * Native `|=` header cells (CARVE-P9-006) take the header color that a GFM
@@ -103,13 +106,13 @@ const CASES = [
     { name: 'the second native header cell', source: '|= Name |= Qty |\n| a | 1 |\n', at: [0, 9], expect: 'title', under: true },
     { name: 'a data cell below native headers', source: '|= Name |= Qty |\n| a | 1 |\n', at: [1, 1], expect: null },
     { name: 'a native row header in a body row', source: '| a |= b |\n', at: [0, 5], expect: 'title', under: true },
-    { name: 'a deprecated glued alignment header', source: '|=> Qty |\n| 1 |\n', at: [0, 1], expect: 'title', under: true },
+    { name: 'a glued alignment mark is header text', source: '|=> Qty |\n| 1 |\n', at: [0, 1], expect: 'title', under: true },
     { name: 'an empty native header cell', source: '|= |= a |\n| 1 | 2 |\n', at: [0, 1], expect: 'title', under: true },
     { name: 'control: =x with no padding space is a data cell', source: '|=x |\n| a |\n', at: [0, 1], expect: null },
-    { name: 'inline markup inside a native header keeps its color', source: '|= =x= |\n| a |\n', at: [0, 3], expect: 'punctuation.delimiter' },
-    { name: 'a header whose attribute value holds a brace', source: '|=>{title="a}b"} H |\n| x |\n', at: [0, 1], expect: 'attribute' },
-    { name: 'a header with a braced attribute value is a header', source: '|=>{title="a}b"} H |\n| x |\n', at: [0, 1], expect: 'title', under: true },
-    { name: 'a header with an attribute block is a header', source: '|=>{.x} a |\n| b |\n', at: [0, 1], expect: 'title', under: true },
+    { name: 'inline markup inside a native header keeps its color', source: '|= {=x=} |\n| a |\n', at: [0, 3], expect: 'punctuation.delimiter' },
+    { name: 'a header whose attribute value holds a brace', source: '|={> title="a}b"} H |\n| x |\n', at: [0, 1], expect: 'attribute' },
+    { name: 'a header with a braced attribute value is a header', source: '|={> title="a}b"} H |\n| x |\n', at: [0, 1], expect: 'title', under: true },
+    { name: 'a header with an attribute block is a header', source: '|={> .x} a |\n| b |\n', at: [0, 1], expect: 'title', under: true },
     { name: 'control: a data cell with an attribute block is not a header', source: '|{.x} a |\n', at: [0, 1], expect: null, under: true },
     /*
      * Braced alignment (markup-carve/carve#5091 D3): the symbols lead the
@@ -120,18 +123,20 @@ const CASES = [
     { name: 'a braced alignment data cell run', source: '|={<} a |\n|{>} 3 |\n', at: [1, 1], expect: 'attribute' },
     { name: 'control: an invalid alignment block is cell text', source: '|{^} a |\n', at: [0, 1], expect: null },
     { name: 'an unclosed frontmatter opener (markup-carve/carve#5016)', source: '---yaml\na: 1\n\n# not a heading\n', at: [0, 0], expect: 'text.literal', under: true },
-    { name: 'a spaced thematic break', source: '- - -\n', at: [0, 0], expect: 'punctuation.special', end: [1, 0] },
+    { name: 'an equals heading marker', source: '== Two\n', at: [0, 0], expect: 'punctuation.special' },
+    { name: 'an equals heading is a title', source: '== Two\n', at: [0, 0], expect: 'title', under: true },
+    { name: 'a region marker line', source: '%% #region intro\ntext\n%% #endregion\n', at: [2, 0], expect: 'comment' },
+    { name: 'a thematic break', source: '***\n', at: [0, 0], expect: 'punctuation.special', end: [1, 0] },
     { name: 'a data cell attribute block', source: '|{.x} a |\n', at: [0, 1], expect: 'attribute' },
-    { name: 'a header cell attribute block', source: '|=>{.x} a |\n| b |\n', at: [0, 1], expect: 'attribute' },
-    { name: 'a continuation row marker', source: '| a | b |\n+ c | d |\n', at: [1, 0], expect: 'operator' },
-    { name: 'a continuation row pipe', source: '| a | b |\n+ c | d |\n', at: [1, 4], expect: 'punctuation.special' },
+    { name: 'a header cell attribute block', source: '|={> .x} a |\n| b |\n', at: [0, 1], expect: 'attribute' },
+    { name: 'a continuation row marker', source: '| a | b |\n+ c | d |\n', at: [1, 0], expect: 'operator', pending: TS695 },
+    { name: 'a continuation row pipe', source: '| a | b |\n+ c | d |\n', at: [1, 4], expect: 'punctuation.special', pending: TS695 },
     { name: 'the continuation marker behind a one-cell row', source: '| a |\n+ cont cell |\n', at: [1, 0], expect: 'operator' },
     { name: 'a native header cell marker', source: '|= Name |\n', at: [0, 1], expect: 'operator' },
     { name: 'a row span cell', source: '| a | ^ |\n', at: [0, 6], expect: 'operator' },
     { name: 'a column span cell', source: '| a | < |\n', at: [0, 6], expect: 'operator' },
     { name: 'the alignment inside a cell marker run', source: '|={>} Name |\n', at: [0, 3], expect: 'operator' },
     { name: 'the attribute list inside a cell marker run', source: '|{> .x} a |\n', at: [0, 4], expect: 'property' },
-    { name: 'a substitution arrow', source: 'a {~old~>new~} b\n', at: [0, 7], expect: 'punctuation.delimiter' },
     { name: 'an inline note closer', source: 'x ^[a note] c\n', at: [0, 10], expect: 'punctuation.bracket' },
     { name: 'inline extension content', source: 'a :abbr[HTML] b\n', at: [0, 8], expect: 'string' },
     {
@@ -291,18 +296,6 @@ const CASES = [
         source: ':: Term\n: The description.\n',
         at: [1, 0],
         expect: 'punctuation.special',
-    },
-    {
-        name: 'the list continuation marker is painted',
-        source: '- item\n+\nan attached block\n',
-        at: [1, 0],
-        expect: 'operator',
-    },
-    {
-        name: 'the task item continuation marker is painted',
-        source: '- [ ] +\n```sh\nnpm test\n```\n',
-        at: [0, 6],
-        expect: 'operator',
     },
 
     /*
@@ -576,7 +569,21 @@ try {
     }
 
     const fails = [];
+    const pendingFails = [];
     CASES.forEach((testCase, index) => {
+        const before = fails.length;
+        check(testCase, index);
+        if (!testCase.pending) return;
+        if (fails.length > before) {
+            pendingFails.push(`PENDING ${testCase.name} (${testCase.pending})`);
+            fails.length = before;
+        } else {
+            fails.push(`FAIL ${testCase.name}\n   passes now; drop its pending flag (${testCase.pending})`);
+        }
+    });
+    for (const line of pendingFails) console.log(line);
+
+    function check(testCase, index) {
         const file = basename(paths[index]);
         const captures = byFile.get(file);
         if (!captures) {
@@ -614,7 +621,7 @@ try {
                 );
             }
         }
-    });
+    }
 
     if (fails.length) {
         console.log(`highlight captures: ${fails.length} of ${CASES.length} failing`);

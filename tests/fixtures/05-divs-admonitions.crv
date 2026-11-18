@@ -1,4 +1,4 @@
-# Divs and admonitions
+= Divs and admonitions
 
 A plain div:
 
@@ -28,8 +28,8 @@ Destructive: cannot be undone.
 
 Nested div with class:
 
-{.aside .small}
-:::
+{.small}
+::: aside
 A side note styled as small text.
 :::
 

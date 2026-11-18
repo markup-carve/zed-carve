@@ -1,8 +1,8 @@
-# Code blocks
+= Code blocks
 
 A PHP example:
 
-``` php
+```php
 <?php
 declare(strict_types=1);
 
@@ -13,7 +13,7 @@ function greet(string $name): string {
 
 A JavaScript example:
 
-``` javascript
+```javascript
 function greet(name) {
     return `Hello, ${name}!`;
 }
@@ -21,7 +21,7 @@ function greet(name) {
 
 A bash example:
 
-``` bash
+```bash
 #!/usr/bin/env bash
 set -euo pipefail
 echo "hello"
@@ -29,7 +29,7 @@ echo "hello"
 
 A YAML example:
 
-``` yaml
+```yaml
 name: example
 version: 1.0
 dependencies:
@@ -39,7 +39,7 @@ dependencies:
 
 A raw HTML block:
 
-```raw html
+```=html
 <details><summary>Click</summary>Hidden content</details>
 ```
 
