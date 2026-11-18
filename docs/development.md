@@ -11,6 +11,10 @@ Zed fetches the configured Tree-sitter grammar on first install. Reinstall the
 dev extension after changing the pinned grammar revision in `extension.toml` so
 Zed rebuilds it.
 
+On the `next2` branch the extension targets Carve 0.2. The grammar pin points at
+tree-sitter-carve `next2`, and `path = "v2"` selects the Carve 0.2 grammar in
+that repository's `v2/` directory.
+
 ## Testing
 
 There is no standalone Zed extension test runner in the Zed CLI. The
@@ -18,13 +22,14 @@ There is no standalone Zed extension test runner in the Zed CLI. The
 push and pull request:
 
 - `extension.toml` is valid and pins a full grammar commit hash.
-- The pinned grammar generates successfully and passes its corpus.
+- The pinned grammar, in the directory `path` names, passes its corpus.
 - Every query compiles against that exact grammar revision.
 - The captures an editor would actually paint resolve as expected.
 - Every fixture parses without `ERROR` or `MISSING` nodes.
 
 To reproduce the query and fixture checks, build the grammar from a sibling
-checkout at the revision pinned in `extension.toml`, then run:
+checkout at the revision pinned in `extension.toml`, register the directory
+`path` names under the `text.carve` scope, then run:
 
 ```bash
 tree-sitter query --scope text.carve languages/carve/highlights.scm tests/fixtures/99-kitchen-sink.crv
@@ -45,6 +50,10 @@ file expresses precedence in general: `(code) @none` sits below the
 `@text.literal` block rather than outranking it, and the composite-figure
 patterns sit below the generic `[(class) (class_name)] @type` line.
 
+A case can carry `pending` with the grammar ticket that blocks it. A pending case
+that fails is listed and does not fail the run; one that passes fails the run,
+so the flag is dropped once the grammar catches up.
+
 The script shells out to the tree-sitter CLI, so it needs no dependencies of its
 own. Point it at a specific CLI and config with `TS_CLI` and `TS_CONFIG_PATH`:
 
@@ -59,4 +68,6 @@ extensions, comments, math, code blocks, and links are highlighted.
 ## Fixtures
 
 The documents under `tests/fixtures/` exercise representative real-world
-syntax and support both automated parsing checks and manual validation.
+syntax and support both automated parsing checks and manual validation. They are Carve 0.2 source, lint and `fmt --check` clean with the
+0.2 CLI, except `12-unclosed-frontmatter.crv`, which keeps an unclosed
+frontmatter block on purpose to check the grammar's recovery.

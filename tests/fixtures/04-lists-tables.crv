@@ -1,4 +1,4 @@
-# Lists
+= Lists
 
 Unordered list:
 
@@ -18,7 +18,7 @@ Task list:
 
 - [ ] Open
 - [x] Done
-- [X] Done uppercase
+- [x] Done uppercase
 - [_] Open underscore
 - [-] Dropped
 - [>] Deferred
@@ -28,17 +28,16 @@ Definition list:
 
 : Apple
 
-  A red fruit, sometimes green.
+A red fruit, sometimes green.
 
 : Banana
 
-  A yellow fruit, often curved.
+A yellow fruit, often curved.
 
-# Tables
+= Tables
 
-| Name    | Role       | Active |
-|---------|------------|:------:|
-| Alice   | Developer  | yes    |
-| Bob     | Designer   | no     |
-| Charlie | PM         | yes    |
+|= Name |= Role |={~} Active |
+| Alice | Developer | yes |
+| Bob | Designer | no |
+| Charlie | PM | yes |
 ^ Team members as of Q1.

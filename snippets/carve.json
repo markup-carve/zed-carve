@@ -6,8 +6,8 @@
   },
   "Div with class": {
     "prefix": "div",
-    "body": ["{.$1}", ":::", "$0", ":::"],
-    "description": "Generic div block with class attribute"
+    "body": ["::: ${1:class}", "$0", ":::"],
+    "description": "Div with a class"
   },
   "Code block": {
     "prefix": "code",
@@ -24,7 +24,7 @@
   },
   "Frontmatter": {
     "prefix": "fm",
-    "body": ["---yaml", "title: $1", "---", "", "$0"],
+    "body": ["---", "title: $1", "---", "", "$0"],
     "description": "YAML frontmatter block"
   },
   "Footnote": {

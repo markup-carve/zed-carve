@@ -1,19 +1,21 @@
-# Heading level 1
+= Heading level 1
 
-## Heading level 2
+== Heading level 2
 
-### Heading level 3
+=== Heading level 3
 
-#### Heading level 4
+==== Heading level 4
 
-##### Heading level 5
+===== Heading level 5
 
-###### Heading level 6
+====== Heading level 6
 
 Body text after a heading.
 
-# A heading ends at the newline
+= A heading ends at the newline
+
 Prose written directly beneath it is a paragraph, not part of the title.
 
-## Same level, twice
-## The second is its own heading, not a continuation
+== Same level, twice
+
+== The second is its own heading, not a continuation

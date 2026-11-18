@@ -3,27 +3,27 @@
 
 ((heading
   (marker) @_m) @title
-  (#eq? @_m "# "))
+  (#match? @_m "^(#|=) +$"))
 
 ((heading
   (marker) @_m) @title
-  (#eq? @_m "## "))
+  (#match? @_m "^(##|==) +$"))
 
 ((heading
   (marker) @_m) @title
-  (#eq? @_m "### "))
+  (#match? @_m "^(###|===) +$"))
 
 ((heading
   (marker) @_m) @title
-  (#eq? @_m "#### "))
+  (#match? @_m "^(####|====) +$"))
 
 ((heading
   (marker) @_m) @title
-  (#eq? @_m "##### "))
+  (#match? @_m "^(#####|=====) +$"))
 
 ((heading
   (marker) @_m) @title
-  (#eq? @_m "###### "))
+  (#match? @_m "^(######|======) +$"))
 
 (heading (marker) @punctuation.special)
 
@@ -98,7 +98,6 @@
 
 (table_header "|" @punctuation.special)
 (table_row "|" @punctuation.special)
-(table_separator) @punctuation.special
 
 ; A `+` continuation row: its marker and its pipes. The cells are inline.
 (table_continuation_row
@@ -130,9 +129,6 @@
   .) @_cell
   (#match? @_cell "^[ \\t]*[<^][ \\t]*$"))
 
-(table_separator
-  (table_cell_alignment) @operator)
-
 (table_caption (marker) @punctuation.special)
 (table_caption) @emphasis
 
@@ -153,9 +149,6 @@
   (list_marker_upper_roman_period)
   (list_marker_upper_roman_paren)
 ] @punctuation.special
-
-; The `+` continuation operator attaches the next block to its container.
-(list_continuation_marker) @operator
 
 (list_marker_task (unchecked)) @punctuation.special
 (list_marker_task (checked)) @punctuation.special
@@ -218,7 +211,6 @@
 (tag) @tag
 (insert) @emphasis
 (delete) @emphasis
-(substitution) @emphasis
 (editorial_comment) @comment
 
 [
@@ -273,6 +265,7 @@
 ; Comments.
 [
   (comment_line)
+  (region_marker)
   (braced_comment)
   (trailing_comment)
 ] @comment
@@ -344,12 +337,6 @@
   (#eq? @attribute "table")
   (#eq? @_option "@code")
   (#any-of? @_language "csv" "tsv"))
-
-((_
-  (block_attribute args: (args (boolean_attribute (key) @attribute)))
-  . [(block_attribute) (block_quote_marker)]*
-  . [(list) (definition_list)])
-  (#eq? @attribute "loose"))
 
 ; The language attribute: `{:fr}`, `{:zh-Hant}` (markup-carve/carve#1114).
 (language_attribute) @attribute
@@ -448,15 +435,6 @@
     "]"
   ] @punctuation.bracket)
 
-(substitution
-  to: (content) @emphasis)
-
-(substitution
-  [
-    "{~"
-    "~>"
-    "~}"
-  ] @punctuation.delimiter)
 
 (inline_note
   "]" @punctuation.bracket)
