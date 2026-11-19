@@ -152,6 +152,9 @@
 
 (list_marker_task (unchecked)) @punctuation.special
 (list_marker_task (checked)) @punctuation.special
+; The box of an ordered item (C2-B-046).
+(list_item checkmark: (unchecked) @punctuation.special)
+(list_item checkmark: (checked) @punctuation.special)
 (checked) @constant.builtin
 
 ; Smart-typography tokens.
