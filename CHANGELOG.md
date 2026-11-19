@@ -8,6 +8,10 @@ Releases before 0.1.4 are described on the
 
 ## [Unreleased]
 
+### Breaking
+
+- The extension highlights Carve 0.2 and no longer Carve 0.1. It loads the tree-sitter-carve grammar from the repository root, where the 0.2 grammar now lives, instead of its former `v2/` directory.
+
 ## [0.1.9] - 2026-11-12
 
 Zed follows the Carve 0.1.14 grammar, colors native table headers and writes canonical snippets.

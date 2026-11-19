@@ -13,9 +13,7 @@ capabilities = []
 
 [grammars.carve]
 repository = "https://github.com/markup-carve/tree-sitter-carve"
-rev = "f634264a130c6c01a1aae96ae7d733c71e45b966"
-# The Carve 0.2 grammar lives in its own directory on tree-sitter-carve next2.
-path = "v2"
+rev = "e374066b34357f171d237c20a21df8f70f279267"
 
 [language_servers.carve-lsp]
 name = "Carve LSP"
