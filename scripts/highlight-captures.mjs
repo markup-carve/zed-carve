@@ -130,6 +130,8 @@ const CASES = [
     { name: 'a header cell attribute block', source: '|={> .x} a |\n| b |\n', at: [0, 1], expect: 'attribute' },
     { name: 'a continuation row marker', source: '| a | b |\n+ c | d |\n', at: [1, 0], expect: 'operator' },
     { name: 'a continuation row pipe', source: '| a | b |\n+ c | d |\n', at: [1, 4], expect: 'punctuation.special' },
+    { name: 'the box of an ordered item', source: '1. [ ] a\n', at: [0, 3], expect: 'punctuation.special' },
+    { name: 'a trailing comment after a row', source: '| a | %% x\n', at: [0, 6], expect: 'comment' },
     { name: 'the continuation marker behind a one-cell row', source: '| a |\n+ cont cell |\n', at: [1, 0], expect: 'operator' },
     { name: 'a native header cell marker', source: '|= Name |\n', at: [0, 1], expect: 'operator' },
     { name: 'a row span cell', source: '| a | ^ |\n', at: [0, 6], expect: 'operator' },
