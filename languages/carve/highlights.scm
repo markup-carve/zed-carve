@@ -409,8 +409,6 @@
 
 ; Citations (§22 / Tier-2 extension).
 (citation_group) @string.special
-(citation_definition (citation_label) @link_text)
-(citation_definition (citation_entry) @string)
 
 ; Callout list (§10 / Tier-2 extension).
 (callout_list) @punctuation.special
