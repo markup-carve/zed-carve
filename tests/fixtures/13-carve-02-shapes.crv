@@ -1,0 +1,21 @@
+= Carve 0.2 shapes
+
+%% #region inline
+
+Braced forms: {_underline_}, {~strike~}, {=highlight=}, {+insert+} and
+{-delete-}.
+
+Raw inline output: `<kbd>Ctrl</kbd>`{=html} and `\LaTeX`{=latex}.
+
+%% #endregion
+
+== Tables
+
+|= Item |={>} Price |
+| Tea | 3 |
+| Coffee | 4 |
+
+***
+
+a. one
+b. two

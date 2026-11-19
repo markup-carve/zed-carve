@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, next2]
   pull_request:
 
 permissions:
@@ -56,8 +56,13 @@ jobs:
           with open("languages/carve/config.toml", "rb") as f:
               tomllib.load(f)
 
+          path = grammar.get("path", ".")
+          if not re.fullmatch(r"[A-Za-z0-9_./-]+", path) or ".." in path.split("/"):
+              sys.exit(f"extension.toml: [grammars.carve] path must be a plain subdirectory, got: {path!r}")
+
           print(f"repo={repo}")
           print(f"rev={rev}")
+          print(f"path={path}")
           print(f"extension.toml ok; grammar {repo}@{rev}", file=sys.stderr)
           PY
 
@@ -74,14 +79,13 @@ jobs:
           git fetch --depth 1 origin "$rev"
           git checkout FETCH_HEAD
 
-      # Generate, build, and run the grammar's own corpus tests. This is the
-      # cheapest real correctness signal that the pinned rev is buildable and
-      # internally consistent for a grammar-consuming extension.
-      - name: Generate, build, and test grammar
-        working-directory: grammar
+      # Build and run the grammar's own corpus tests in the directory Zed
+      # compiles (`path` in extension.toml). The generated parser is committed
+      # upstream, and upstream CI checks that it is current.
+      - name: Build and test grammar
+        working-directory: grammar/${{ steps.manifest.outputs.path }}
         run: |
           set -euo pipefail
-          npx --yes "$TS_CLI" generate
           npx --yes "$TS_CLI" test
 
       # Register the freshly built grammar so `tree-sitter query`/`parse` can
@@ -93,7 +97,13 @@ jobs:
         run: |
           set -euo pipefail
           npx --yes "$TS_CLI" init-config
-          ln -s "$PWD/grammar" "$PWD/tree-sitter-carve"
+          grammar_dir="$PWD/grammar/${{ steps.manifest.outputs.path }}"
+          # A grammar subdirectory carries no package.json, which is where this
+          # CLI looks up `--scope text.carve`.
+          if [ ! -f "$grammar_dir/package.json" ]; then
+            printf '%s\n' '{"name":"tree-sitter-carve","tree-sitter":[{"scope":"text.carve","file-types":["crv"]}]}' > "$grammar_dir/package.json"
+          fi
+          ln -s "$grammar_dir" "$PWD/tree-sitter-carve"
           config="$HOME/.config/tree-sitter/config.json"
           python3 - "$config" "$PWD" <<'PY'
           import json, sys

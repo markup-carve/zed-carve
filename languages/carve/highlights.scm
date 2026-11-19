@@ -3,27 +3,27 @@
 
 ((heading
   (marker) @_m) @title
-  (#eq? @_m "# "))
+  (#match? @_m "^(#|=) +$"))
 
 ((heading
   (marker) @_m) @title
-  (#eq? @_m "## "))
+  (#match? @_m "^(##|==) +$"))
 
 ((heading
   (marker) @_m) @title
-  (#eq? @_m "### "))
+  (#match? @_m "^(###|===) +$"))
 
 ((heading
   (marker) @_m) @title
-  (#eq? @_m "#### "))
+  (#match? @_m "^(####|====) +$"))
 
 ((heading
   (marker) @_m) @title
-  (#eq? @_m "##### "))
+  (#match? @_m "^(#####|=====) +$"))
 
 ((heading
   (marker) @_m) @title
-  (#eq? @_m "###### "))
+  (#match? @_m "^(######|======) +$"))
 
 (heading (marker) @punctuation.special)
 
@@ -98,7 +98,6 @@
 
 (table_header "|" @punctuation.special)
 (table_row "|" @punctuation.special)
-(table_separator) @punctuation.special
 
 ; A `+` continuation row: its marker and its pipes. The cells are inline.
 (table_continuation_row
@@ -130,9 +129,6 @@
   .) @_cell
   (#match? @_cell "^[ \\t]*[<^][ \\t]*$"))
 
-(table_separator
-  (table_cell_alignment) @operator)
-
 (table_caption (marker) @punctuation.special)
 (table_caption) @emphasis
 
@@ -154,11 +150,11 @@
   (list_marker_upper_roman_paren)
 ] @punctuation.special
 
-; The `+` continuation operator attaches the next block to its container.
-(list_continuation_marker) @operator
-
 (list_marker_task (unchecked)) @punctuation.special
 (list_marker_task (checked)) @punctuation.special
+; The box of an ordered item (C2-B-046).
+(list_item checkmark: (unchecked) @punctuation.special)
+(list_item checkmark: (checked) @punctuation.special)
 (checked) @constant.builtin
 
 ; Smart-typography tokens.
@@ -218,7 +214,6 @@
 (tag) @tag
 (insert) @emphasis
 (delete) @emphasis
-(substitution) @emphasis
 (editorial_comment) @comment
 
 [
@@ -273,6 +268,7 @@
 ; Comments.
 [
   (comment_line)
+  (region_marker)
   (braced_comment)
   (trailing_comment)
 ] @comment
@@ -331,25 +327,17 @@
   (#any-of? @_language "csv" "tsv"))
 
 ; A CSV or TSV code include renders as a table under `{table}` too
-; (markup-carve/carve#3335); the include must be the paragraph's only content.
+; (C2-N-045). A directive alone on its line is a block of its own (C2-B-156).
 ((_
   (block_attribute args: (args (boolean_attribute (key) @attribute)))
   . [(block_attribute) (block_quote_marker)]*
-  . (paragraph
-      . (include_directive
-          option: (include_option
-            name: (include_option_name) @_option
-            value: (include_option_value) @_language))
-      .))
+  . (include_directive
+      option: (include_option
+        name: (include_option_name) @_option
+        value: (include_option_value) @_language)))
   (#eq? @attribute "table")
   (#eq? @_option "@code")
   (#any-of? @_language "csv" "tsv"))
-
-((_
-  (block_attribute args: (args (boolean_attribute (key) @attribute)))
-  . [(block_attribute) (block_quote_marker)]*
-  . [(list) (definition_list)])
-  (#eq? @attribute "loose"))
 
 ; The language attribute: `{:fr}`, `{:zh-Hant}` (markup-carve/carve#1114).
 (language_attribute) @attribute
@@ -419,10 +407,6 @@
 (caption (caption_marker) @punctuation.special)
 (caption (caption_content) @emphasis)
 
-; Citations (§22 / Tier-2 extension).
-(citation_group) @string.special
-(citation_definition (citation_label) @link_text)
-(citation_definition (citation_entry) @string)
 
 ; Callout list (§10 / Tier-2 extension).
 (callout_list) @punctuation.special
@@ -448,15 +432,6 @@
     "]"
   ] @punctuation.bracket)
 
-(substitution
-  to: (content) @emphasis)
-
-(substitution
-  [
-    "{~"
-    "~>"
-    "~}"
-  ] @punctuation.delimiter)
 
 (inline_note
   "]" @punctuation.bracket)

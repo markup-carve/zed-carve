@@ -2,7 +2,8 @@
 title: Kitchen sink
 ---
 
-# Kitchen sink {#kitchen-sink .demo}
+{#kitchen-sink .demo}
+= Kitchen sink
 
 A paragraph with /italic/, *bold*, `code`, and a [link](https://example.com).
 
@@ -12,29 +13,27 @@ Reference-style: [the example][ex] elsewhere.
 
 Autolink: <https://markup-carve.github.io/carve/>.
 
-## Lists
+== Lists
 
 - Item with `inline code`
 - Item with [a link](#kitchen-sink)
-
   - Nested
-
     - Deeper
 
-1. First {.first}
+1. [First]{.first}
 2. Second
 3. Third
 
-## Tables
+== Tables
 
-| Col 1 | Col 2 |
-|-------|-------|
-| a     | b     |
-| c     | d     |
+|= Col 1 |= Col 2 |
+| a | b |
+| c | d |
 
-## Carve extras
+== Carve extras
 
 *[HTML]: HyperText Markup Language
+
 *[CSS]: Cascading Style Sheets
 
 Inline extensions: :kbd[Ctrl] and :mark[important].
@@ -52,24 +51,24 @@ A multi-line draft comment that won't render
 in the HTML output. Useful for inline TODOs.
 %%%
 
-## Code injection
+== Code injection
 
-``` rust
+```rust
 let html = carve::to_html("# Hi");
 println!("{html}");
 ```
 
-``` bash
+```bash
 cargo run -- examples/basic.crv
 ```
 
-## Math
+== Math
 
 Inline $`a^2 + b^2 = c^2` and display:
 
 $$`\int_0^\infty e^{-x^2} \, dx = \frac{\sqrt{\pi}}{2}`
 
-## Divs
+== Divs
 
 {.warning}
 :::
@@ -80,13 +79,13 @@ Be careful with `unsafe` blocks.
 Run `tree-sitter test` before opening a PR.
 :::
 
-## Footnotes
+== Footnotes
 
 A sentence with a footnote.[^one]
 
 [^one]: The footnote content.
 
-## Comments
+== Comments
 
 %%%%
 %%%
@@ -94,10 +93,9 @@ Block-level fenced comment.
 Can span multiple paragraphs.
 %%%
 %%%%
-
 %% Inline short comment.
 
-## Reserved processor syntax
+== Reserved processor syntax
 
 See {{ chapters/intro.crv #intro }} for the opening, and
 {{ "docs/appendix b.crv" #tables @level:2 }} for the tables.
