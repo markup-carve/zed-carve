@@ -407,8 +407,6 @@
 (caption (caption_marker) @punctuation.special)
 (caption (caption_content) @emphasis)
 
-; Citations (§22 / Tier-2 extension).
-(citation_group) @string.special
 
 ; Callout list (§10 / Tier-2 extension).
 (callout_list) @punctuation.special
