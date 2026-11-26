@@ -1,4 +1,4 @@
-# Braced cell alignment
+= Braced cell alignment
 
 |={<} Item |={>} Price |={~^} Note |
 | Tea | 3 | hot |
@@ -6,6 +6,6 @@
 
 Breaks spelled with spaces:
 
-- - -
+***
 
-* * *
+***

@@ -1,4 +1,4 @@
-# The colon fence's sigil family
+= The colon fence's sigil family
 
 Three colon fences take a punctuation mark where the others take a word. The
 sigil is the only character on the opener that says which container it is.

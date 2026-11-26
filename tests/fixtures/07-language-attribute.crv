@@ -7,6 +7,6 @@ A block-attribute line carrying a language.
 
 1.{:fr} an ordered marker glued to a language attribute
 
-A language beside other items: [z]{#i :fr .c}.
+A language beside other items: [z]{#i .c :fr}.
 
 The empty form: [w]{:}.

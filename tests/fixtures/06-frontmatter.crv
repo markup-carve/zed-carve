@@ -9,7 +9,7 @@ tags:
 draft: false
 ---
 
-# Blog post title
+= Blog post title
 
 Body content follows the frontmatter block.
 
