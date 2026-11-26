@@ -12,7 +12,7 @@ dev extension after changing the pinned grammar revision in `extension.toml` so
 Zed rebuilds it.
 
 The extension targets Carve 0.2. The grammar pin points at tree-sitter-carve
-`next2`, whose root holds the Carve 0.2 grammar.
+`main`, whose root holds the Carve 0.2 grammar.
 
 ## Testing
 
