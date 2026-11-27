@@ -78,6 +78,11 @@ const PAIR_IN_QUOTED_VALUE_DIRECTIVE = '{{ ch.crv @label:"a }} b" }} tail\n';
  */
 
 const CASES = [
+    { name: 'snippet definition name', source: '{$ver}: 0.2.3\n', at: [0, 2], expect: 'variable' },
+    { name: 'snippet definition marker', source: '{$ver}: 0.2.3\n', at: [0, 0], expect: 'punctuation.special' },
+    { name: 'snippet definition separator', source: '{$ver}: 0.2.3\n', at: [0, 6], expect: 'punctuation.delimiter' },
+    { name: 'snippet use name', source: 'Use {{ $ver }}.\n', at: [0, 8], expect: 'variable' },
+    { name: 'snippet use marker', source: 'Use {{ $ver }}.\n', at: [0, 4], expect: 'punctuation.special' },
     { name: 'kbd on a span', source: '[Tab]{kbd}\n', at: [0, 6], expect: 'attribute' },
     { name: 'abbr on a span', source: '[ABC]{abbr=ABC}\n', at: [0, 6], expect: 'attribute' },
     { name: 'time on a span', source: '[10:00]{time=10:00}\n', at: [0, 8], expect: 'attribute' },
