@@ -8,9 +8,22 @@ Releases before 0.1.4 are described on the
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-27
+
+Zed highlights Carve 0.2.
+
 ### Breaking
 
-- The extension highlights Carve 0.2 and no longer Carve 0.1. It loads the tree-sitter-carve grammar from the repository root, where the 0.2 grammar now lives, instead of its former `v2/` directory.
+- The extension highlights Carve 0.2 and no longer Carve 0.1. It loads the tree-sitter-carve grammar from the repository root, where the 0.2 grammar now lives, instead of its former `v2/` directory (#111, #117).
+- The queries drop the nodes Carve 0.2 removed: substitutions, the GFM separator row, the `+` list continuation, `{loose}`, citation groups and citation definitions. Snippets write Carve 0.2 source (#111, #119, #120).
+
+### Improvements
+
+- `=` heading markers take their level, region markers take the comment color, and raw inline spans inject their language from the `{=format}` token, now including xml, svg, css, js, json and markdown (#111).
+- Table continuation rows, cell alignment and attribute lists, native header signs, row and column spans, admonition titles, code block labels and inline extension content get captures (#110).
+- An ordered task item's box takes the same color as a bullet task box (#116).
+
+**Full Changelog**: https://github.com/markup-carve/zed-carve/compare/v0.1.9...v0.2.0
 
 ## [0.1.9] - 2026-11-12
 
